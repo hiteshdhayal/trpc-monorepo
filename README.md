@@ -1,135 +1,143 @@
-# Turborepo starter
+# FinalForms
 
-This Turborepo starter is maintained by the Turborepo core team.
+A production-grade, Typeform-inspired conversational form builder SaaS built with tRPC, Drizzle ORM, Next.js, and Express in a Turborepo monorepo.
 
-## Using this example
+![CI](https://github.com/hitesh/finalforms/actions/workflows/ci.yml/badge.svg)
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 👨‍⚖️ Quick Start for Judges
+
+### 🔑 Demo Credentials
+| Field    | Value                  |
+|----------|------------------------|
+| Email    | `admin@finalforms.com`  |
+| Password | `password123`          |
+
+### 🚀 Start the App
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Start Docker (Postgres) then seed
+docker compose up -d
+pnpm --filter @repo/database seed
+
+# 3. Run everything
+pnpm dev
 ```
 
-## What's inside?
+### 🔗 URLs
+- **Frontend**: http://localhost:3000
+- **API Docs (Scalar)**: http://localhost:8000/docs
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
 
-This Turborepo includes the following packages/apps:
+### 🗺️ Seeded Data Map
 
-### Apps and Packages
+| Seeded Form                | URL                    | Feature to Evaluate                              |
+|----------------------------|------------------------|--------------------------------------------------|
+| Hogwarts Sorting Ceremony  | `/forms/sorting-hat`   | Drop-off funnel analytics, honeypot protection   |
+| Night City Glitch Registry | `/forms/cyber-glitch`  | Cyberpunk theme, response limit enforcement      |
+| Y-Combinator Application   | Dashboard → forms list | Startup theme, unlisted visibility               |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 🛠️ Tech Stack & Architecture
 
-### Utilities
+- **Monorepo Manager**: Turborepo + pnpm workspaces
+- **Frontend (`apps/web`)**: Next.js 16 (React 19), Tailwind CSS v4, shadcn/radix primitives
+- **API Server (`apps/api`)**: Express + tRPC + Scalar OpenAPI docs at `/docs`
+- **Database (`packages/database`)**: PostgreSQL (Docker) via Drizzle ORM
+- **Shared Packages**:
+  - `@repo/trpc` — tRPC router types shared by web and api
+  - `@repo/database` — Drizzle schema models, relations, migrations, seed
+  - `@repo/services` — Business logic, JWT auth, email
+  - `@repo/logger` — Winston console logger
 
-This Turborepo has some additional tools already setup for you:
+---
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## ✨ Key Features
 
-### Build
+### Form Builder
+- 6 field types: short text, long text, email, number, single select, multi select
+- Conditional logic (show/hide fields based on answers)
+- Three visual themes: Startup, Hogwarts, Cyberpunk
+- Live preview during editing
+- Custom URL slugs, expiry dates, response limits
 
-To build all apps and packages, run the following command:
+### Form Filler (Public)
+- Conversational stepper UI with Framer Motion transitions
+- Enter key navigation, keyboard-first UX
+- Honeypot bot protection + IP rate limiting
+- No login required to submit forms
+- Partial progress saved to database per-question
 
-```
-cd my-turborepo
+### Analytics Dashboard
+- Completion rate metrics
+- Per-field drop-off funnel chart
+- Choice distribution pie charts (computed server-side)
+- Response timeline bucketed by day (`date_trunc`)
+- Streaming CSV export with proper escaping
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+### Security
+- Helmet + strict CORS (exact frontend URL, not `*`)
+- Zod environment validation at startup
+- JWT authentication with `crypto.scryptSync` password hashing
+- Form ownership verification on every creator mutation
+- Independent rate limiting: 10 submissions per IP per 10 minutes
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+---
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 📊 Database Schema
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+5 core tables with Drizzle relations:
+1. **`users`** — creators (name, email, password hash)
+2. **`forms`** — config (title, status, visibility, theme, slug, limits, expiry)
+3. **`form_fields`** — inputs (type, label, required, options, validation rules)
+4. **`responses`** — submissions (completion status, respondent email, timestamps)
+5. **`response_answers`** — individual answers keyed by fieldId (JSON snapshots)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+---
 
-### Develop
+## 🧪 Testing
 
-To develop all apps and packages, run the following command:
+```bash
+# Run integration tests
+pnpm turbo test
 
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+# Run linter + type checker
+pnpm turbo lint typecheck
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Tests cover:
+- Auth flows (register, duplicate email, login, wrong password, protected routes)
+- Form submission (valid submit, unpublished rejection, missing required fields, fake fieldId, invalid select option)
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+---
+
+## 🔄 CI Pipeline
+
+GitHub Actions runs on every push to `main`/`dev` and PRs to `main`:
+- `pnpm turbo lint`
+- `pnpm turbo typecheck`
+- `pnpm turbo test`
+
+---
+
+## 📁 Project Structure
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+trpc-monorepo/
+├── apps/
+│   ├── api/          # Express + tRPC server
+│   └── web/          # Next.js frontend
+├── packages/
+│   ├── database/     # Drizzle schema, migrations, seed
+│   ├── services/     # Business logic (form, user, email)
+│   ├── trpc/         # Shared tRPC router definitions
+│   ├── logger/       # Winston logger
+│   ├── eslint-config/
+│   └── typescript-config/
+├── turbo.json
+└── docker-compose.yml
 ```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)

@@ -4,11 +4,17 @@ const envSchema = z.object({
   PORT: z.string().optional(),
   NODE_ENV: z.enum(["development", "prod"]).default("development"),
   BASE_URL: z.string().default("http://localhost:8000"),
+  FRONTEND_URL: z.string({ required_error: "FRONTEND_URL is required for CORS" }).url("FRONTEND_URL must be a valid URL"),
+  DATABASE_URL: z.string({ required_error: "DATABASE_URL is required to connect to the database" }),
+  JWT_SECRET: z.string({ required_error: "JWT_SECRET is required for authentication" }),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {
   const safeParseResult = envSchema.safeParse(env);
-  if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
+  if (!safeParseResult.success) {
+    console.error("❌ Invalid environment variables:", safeParseResult.error.flatten().fieldErrors);
+    throw new Error("Invalid environment variables. Please check your .env file.");
+  }
   return safeParseResult.data;
 }
 

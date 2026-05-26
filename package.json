@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "dotenv -- turbo build",
-    "dev": "dotenv -- turbo dev",
+    "dev": "pnpm exec dotenv turbo run dev",
     "db:generate": "dotenv -- turbo db:generate",
     "db:migrate": "dotenv -- turbo db:migrate",
     "lint": "turbo run lint",
@@ -11,8 +11,9 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "prettier": "^3.7.4",
-    "turbo": "^2.7.2",
+    "turbo": "^2.9.14",
     "typescript": "5.9.2"
   },
   "packageManager": "pnpm@9.0.0",
@@ -20,6 +21,8 @@
     "node": ">=18"
   },
   "dependencies": {
-    "dotenv-cli": "^11.0.0"
+    "dotenv-cli": "^11.0.0",
+    "h3": "2.0.1-rc.22",
+    "node-mock-http": "^1.0.4"
   }
 }

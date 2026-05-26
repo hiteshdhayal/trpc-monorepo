@@ -1,0 +1,15 @@
+:root {
+  --color-bg-primary: #F5F0E8;        /* warm beige parchment — page backgrounds */
+  --color-bg-surface: #EDE8DC;        /* slightly darker beige — card surfaces */
+  --color-bg-elevated: #FAF7F2;       /* off-white — modals, dropdowns, inputs */
+  --color-bg-dark: #1A1008;           /* near-black warm brown — footer, dark accents */
+  --color-accent: #C41E3A;            /* crimson red — primary CTA, links, active states */
+  --color-accent-hover: #8B1A2A;      /* deep crimson — hover states */
+  --color-accent-muted: rgba(196,30,58,0.08);  /* tinted background for badges */
+  --color-border: #D4C9B0;            /* muted warm tan — all borders */
+  --color-border-accent: rgba(196,30,58,0.3);  /* crimson-tinted border */
+  --color-text-primary: #1A1008;      /* near-black warm brown */
+  --color-text-secondary: #6B5744;    /* muted brown */
+  --color-text-muted: #A89880;        /* light muted — text on dark bg */
+  --color-text-on-accent: #FAF7F2;    /* off-white — text on crimson buttons */
+}
