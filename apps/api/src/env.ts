@@ -5,10 +5,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   BASE_URL: z.string().default("http://localhost:8000"),
   FRONTEND_URL: z
-    .string({ required_error: "FRONTEND_URL is required for CORS" })
+    .string({ error: "FRONTEND_URL is required for CORS" })
     .url("FRONTEND_URL must be a valid URL"),
-  DATABASE_URL: z.string({ required_error: "DATABASE_URL is required to connect to the database" }),
-  JWT_SECRET: z.string({ required_error: "JWT_SECRET is required for authentication" }),
+  DATABASE_URL: z.string({ error: "DATABASE_URL is required to connect to the database" }),
+  JWT_SECRET: z.string({ error: "JWT_SECRET is required for authentication" }),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {
