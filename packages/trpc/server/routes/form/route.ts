@@ -68,7 +68,8 @@ export const formRouter = router({
         path: getPath("/"),
         tags: TAGS,
         summary: "List all forms for the authenticated user",
-        description: "Returns all forms created by the currently authenticated user, ordered by creation date. Excludes archived forms by default.",
+        description:
+          "Returns all forms created by the currently authenticated user, ordered by creation date. Excludes archived forms by default.",
       },
     })
     .input(zodUndefinedModel)
@@ -84,7 +85,8 @@ export const formRouter = router({
         path: getPath("/archived"),
         tags: TAGS,
         summary: "List archived forms for the authenticated user",
-        description: "Returns all archived (soft-deleted) forms for the currently authenticated user.",
+        description:
+          "Returns all archived (soft-deleted) forms for the currently authenticated user.",
       },
     })
     .input(zodUndefinedModel)
@@ -100,7 +102,8 @@ export const formRouter = router({
         path: getPath("/explore"),
         tags: TAGS,
         summary: "List all public forms for the explore gallery",
-        description: "Returns all forms with status=published and visibility=public for the public gallery.",
+        description:
+          "Returns all forms with status=published and visibility=public for the public gallery.",
       },
     })
     .input(zodUndefinedModel)
@@ -114,8 +117,8 @@ export const formRouter = router({
           createdAt: z.date(),
           creatorName: z.string(),
           isPasswordProtected: z.boolean(),
-        })
-      )
+        }),
+      ),
     )
     .query(async () => {
       return await formService.getPublicExploreForms();
@@ -128,7 +131,8 @@ export const formRouter = router({
         path: getPath("/{id}"),
         tags: TAGS,
         summary: "Get a form by ID or custom slug",
-        description: "Returns a form with all its fields. Accepts either the UUID or custom slug as the id parameter. isPasswordProtected indicates if the form requires a password.",
+        description:
+          "Returns a form with all its fields. Accepts either the UUID or custom slug as the id parameter. isPasswordProtected indicates if the form requires a password.",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -161,9 +165,9 @@ export const formRouter = router({
             validationRules: z.unknown().nullable(),
             conditionalLogic: z.unknown().nullable(),
             createdAt: z.date(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       return await formService.getFormById(input.id, ctx.userId ?? undefined);
@@ -185,7 +189,7 @@ export const formRouter = router({
         description: z.string().optional(),
         theme: z.string().optional(),
         visibility: z.enum(["public", "unlisted"]).optional(),
-      })
+      }),
     )
     .output(
       z.object({
@@ -200,7 +204,7 @@ export const formRouter = router({
         isArchived: z.boolean(),
         createdAt: z.date(),
         updatedAt: z.date(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       return await formService.createForm(ctx.userId, input);
@@ -213,7 +217,8 @@ export const formRouter = router({
         path: getPath("/{id}/update"),
         tags: TAGS,
         summary: "Update a form's settings",
-        description: "Updates form metadata including title, status, visibility, theme, custom slug, expiry, and response limit.",
+        description:
+          "Updates form metadata including title, status, visibility, theme, custom slug, expiry, and response limit.",
       },
     })
     .input(
@@ -227,7 +232,7 @@ export const formRouter = router({
         customSlug: z.string().optional().nullable(),
         expiryDate: z.date().optional().nullable(),
         responseLimit: z.number().optional().nullable(),
-      })
+      }),
     )
     .output(formOutputSchema)
     .mutation(async ({ input, ctx }) => {
@@ -244,7 +249,8 @@ export const formRouter = router({
         path: getPath("/{id}/archive"),
         tags: TAGS,
         summary: "Archive a form",
-        description: "Soft-deletes a form by setting isArchived=true. The form and all its responses are preserved.",
+        description:
+          "Soft-deletes a form by setting isArchived=true. The form and all its responses are preserved.",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -278,14 +284,15 @@ export const formRouter = router({
         path: getPath("/{id}/password"),
         tags: TAGS,
         summary: "Set a password on a form",
-        description: "Protects a form with a password. Respondents must enter the correct password before seeing form fields.",
+        description:
+          "Protects a form with a password. Respondents must enter the correct password before seeing form fields.",
       },
     })
     .input(
       z.object({
         id: z.string(),
         password: z.string().min(4, "Password must be at least 4 characters"),
-      })
+      }),
     )
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ input, ctx }) => {
@@ -299,7 +306,8 @@ export const formRouter = router({
         path: getPath("/{id}/password"),
         tags: TAGS,
         summary: "Remove password protection from a form",
-        description: "Removes the password requirement from a form, making it publicly accessible again.",
+        description:
+          "Removes the password requirement from a form, making it publicly accessible again.",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -322,7 +330,7 @@ export const formRouter = router({
       z.object({
         formId: z.string(),
         password: z.string(),
-      })
+      }),
     )
     .output(z.object({ valid: z.boolean() }))
     .mutation(async ({ input }) => {
@@ -336,7 +344,8 @@ export const formRouter = router({
         path: getPath("/{id}/clone"),
         tags: TAGS,
         summary: "Clone an existing form",
-        description: "Creates a copy of a form (as a draft in unlisted visibility) with all its fields duplicated. Password is NOT copied.",
+        description:
+          "Creates a copy of a form (as a draft in unlisted visibility) with all its fields duplicated. Password is NOT copied.",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -352,7 +361,7 @@ export const formRouter = router({
         isArchived: z.boolean(),
         createdAt: z.date(),
         updatedAt: z.date(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       return await formService.cloneForm(ctx.userId, input.id);
@@ -381,7 +390,8 @@ export const formRouter = router({
         path: getPath("/{formId}/fields"),
         tags: TAGS,
         summary: "Update all fields for a form",
-        description: "Atomically replaces all fields for a form in a single transaction. Blocked if the form has existing responses.",
+        description:
+          "Atomically replaces all fields for a form in a single transaction. Blocked if the form has existing responses.",
       },
     })
     .input(
@@ -398,9 +408,9 @@ export const formRouter = router({
             options: z.unknown().optional().nullable(),
             validationRules: z.unknown().optional().nullable(),
             conditionalLogic: z.unknown().optional().nullable(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .output(
       z.array(
@@ -416,8 +426,8 @@ export const formRouter = router({
           validationRules: z.unknown().nullable(),
           conditionalLogic: z.unknown().nullable(),
           createdAt: z.date(),
-        })
-      )
+        }),
+      ),
     )
     .mutation(async ({ input, ctx }) => {
       return await formService.updateFormFields(ctx.userId, input.formId, input.fields);
@@ -430,7 +440,8 @@ export const formRouter = router({
         path: getPath("/{formId}/responses/start"),
         tags: TAGS,
         summary: "Start or update a partial form response",
-        description: "Called on each question navigation. Creates a new partial response or updates an existing one. Includes honeypot and rate-limit spam protection.",
+        description:
+          "Called on each question navigation. Creates a new partial response or updates an existing one. Includes honeypot and rate-limit spam protection.",
       },
     })
     .input(
@@ -442,12 +453,12 @@ export const formRouter = router({
         respondentEmail: z.string().optional(),
         deviceToken: z.string().optional(),
         honeypot: z.string().optional(), // Honeypot spam protection field
-      })
+      }),
     )
     .output(
       z.object({
         responseId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // 1. Honeypot check: reject if filled
@@ -473,7 +484,8 @@ export const formRouter = router({
         path: getPath("/{formId}/responses/submit"),
         tags: TAGS,
         summary: "Submit a completed form response",
-        description: "Marks a response as completed, saves all final answers, and triggers a thank-you email to the respondent and a notification email to the form creator.",
+        description:
+          "Marks a response as completed, saves all final answers, and triggers a thank-you email to the respondent and a notification email to the form creator.",
       },
     })
     .input(
@@ -484,16 +496,16 @@ export const formRouter = router({
           z.object({
             fieldId: z.string(),
             answer: z.unknown(),
-          })
+          }),
         ),
         respondentEmail: z.string().optional(),
         honeypot: z.string().optional(), // Honeypot spam protection field
-      })
+      }),
     )
     .output(
       z.object({
         success: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // 1. Honeypot check: reject if filled
@@ -511,7 +523,9 @@ export const formRouter = router({
       return await formService.submitResponse(input.formId, {
         responseId: input.responseId,
         answers: input.answers,
-        respondentEmail: input.respondentEmail ? input.respondentEmail.trim().toLowerCase() : undefined,
+        respondentEmail: input.respondentEmail
+          ? input.respondentEmail.trim().toLowerCase()
+          : undefined,
       });
     }),
 
@@ -522,7 +536,8 @@ export const formRouter = router({
         path: getPath("/{formId}/analytics"),
         tags: TAGS,
         summary: "Get form analytics",
-        description: "Returns completion stats, drop-off funnel data per field, and choice distribution for select/checkbox fields.",
+        description:
+          "Returns completion stats, drop-off funnel data per field, and choice distribution for select/checkbox fields.",
       },
     })
     .input(z.object({ formId: z.string() }))
@@ -541,7 +556,7 @@ export const formRouter = router({
             reached: z.number(),
             dropped: z.number(),
             dropOffRate: z.number(),
-          })
+          }),
         ),
         distributions: z.record(
           z.string(),
@@ -549,16 +564,16 @@ export const formRouter = router({
             z.object({
               option: z.string(),
               count: z.number(),
-            })
-          )
+            }),
+          ),
         ),
         timeline: z.array(
           z.object({
             date: z.string(),
             count: z.number(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       return await formService.getFormAnalytics(ctx.userId, input.formId);
@@ -571,7 +586,8 @@ export const formRouter = router({
         path: getPath("/{formId}/responses"),
         tags: TAGS,
         summary: "Get paginated responses for a form",
-        description: "Returns paginated individual responses with their answers and field labels. Supports completedOnly filter.",
+        description:
+          "Returns paginated individual responses with their answers and field labels. Supports completedOnly filter.",
       },
     })
     .input(
@@ -580,7 +596,7 @@ export const formRouter = router({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
         completedOnly: z.boolean().default(true),
-      })
+      }),
     )
     .output(
       z.object({
@@ -589,7 +605,7 @@ export const formRouter = router({
             id: z.string(),
             label: z.string(),
             type: z.string(),
-          })
+          }),
         ),
         responses: z.array(
           z.object({
@@ -601,9 +617,9 @@ export const formRouter = router({
               z.object({
                 fieldId: z.string(),
                 answer: z.unknown(),
-              })
+              }),
             ),
-          })
+          }),
         ),
         pagination: z.object({
           total: z.number(),
@@ -611,7 +627,7 @@ export const formRouter = router({
           limit: z.number(),
           totalPages: z.number(),
         }),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       return await formService.getResponsesPaginated(ctx.userId, input.formId, {
@@ -628,7 +644,8 @@ export const formRouter = router({
         path: getPath("/{formId}/responses/csv"),
         tags: TAGS,
         summary: "Get all completed responses for CSV export",
-        description: "Returns all completed responses with their answers formatted for CSV download. For streaming export, use the /api/forms/:formId/csv Express endpoint.",
+        description:
+          "Returns all completed responses with their answers formatted for CSV download. For streaming export, use the /api/forms/:formId/csv Express endpoint.",
       },
     })
     .input(z.object({ formId: z.string() }))
@@ -636,7 +653,7 @@ export const formRouter = router({
       z.object({
         fields: z.array(z.unknown()),
         responses: z.array(z.record(z.string(), z.string())),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       return await formService.getResponsesForCsv(ctx.userId, input.formId);

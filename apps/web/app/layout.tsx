@@ -15,7 +15,8 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "FinalForms | Beautiful Typeform-Style Form Builder",
-  description: "Create premium interactive forms, shareable links, and gather insights with advanced analytics.",
+  description:
+    "Create premium interactive forms, shareable links, and gather insights with advanced analytics.",
 };
 
 export default function RootLayout({

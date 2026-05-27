@@ -24,7 +24,7 @@ export const adminRouter = router({
         totalForms: z.number(),
         totalResponses: z.number(),
         completedResponses: z.number(),
-      })
+      }),
     )
     .query(async () => {
       return await adminService.getSystemStats();
@@ -44,7 +44,7 @@ export const adminRouter = router({
       z.object({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
-      })
+      }),
     )
     .output(
       z.object({
@@ -56,7 +56,7 @@ export const adminRouter = router({
             isAdmin: z.boolean(),
             createdAt: z.date().nullable(),
             formCount: z.number(),
-          })
+          }),
         ),
         pagination: z.object({
           total: z.number(),
@@ -64,7 +64,7 @@ export const adminRouter = router({
           limit: z.number(),
           totalPages: z.number(),
         }),
-      })
+      }),
     )
     .query(async ({ input }) => {
       return await adminService.getAllUsers(input.page, input.limit);
@@ -84,7 +84,7 @@ export const adminRouter = router({
       z.object({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
-      })
+      }),
     )
     .output(
       z.object({
@@ -100,7 +100,7 @@ export const adminRouter = router({
             creatorName: z.string(),
             creatorEmail: z.string(),
             responseCount: z.number(),
-          })
+          }),
         ),
         pagination: z.object({
           total: z.number(),
@@ -108,7 +108,7 @@ export const adminRouter = router({
           limit: z.number(),
           totalPages: z.number(),
         }),
-      })
+      }),
     )
     .query(async ({ input }) => {
       return await adminService.getAllForms(input.page, input.limit);
@@ -121,7 +121,8 @@ export const adminRouter = router({
         path: getPath("/users/{userId}"),
         tags: TAGS,
         summary: "Delete a user as admin",
-        description: "Permanently deletes a user account and all their forms (CASCADE). Admin cannot self-delete.",
+        description:
+          "Permanently deletes a user account and all their forms (CASCADE). Admin cannot self-delete.",
       },
     })
     .input(z.object({ userId: z.string() }))

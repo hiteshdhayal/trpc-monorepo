@@ -33,7 +33,7 @@ export const responsesTable = pgTable(
     uniqueIndex("unique_email_per_form_completed")
       .on(table.formId, table.respondentEmail)
       .where(sql`completed = true`),
-  ]
+  ],
 );
 
 export const responsesRelations = relations(responsesTable, ({ one, many }) => ({

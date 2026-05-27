@@ -1,5 +1,11 @@
 import { db } from "./index";
-import { usersTable, formsTable, formFieldsTable, responsesTable, responseAnswersTable } from "./schema";
+import {
+  usersTable,
+  formsTable,
+  formFieldsTable,
+  responsesTable,
+  responseAnswersTable,
+} from "./schema";
 import { eq } from "drizzle-orm";
 import * as crypto from "crypto";
 
@@ -45,7 +51,6 @@ async function main() {
     await db.delete(formsTable).where(eq(formsTable.creatorId, userId));
   }
 
-
   // 2. Insert Hogwarts Sorting Hat Form (Public)
   console.log("🏰 Seeding 'Hogwarts Sorting Hat' Form...");
   const [hogwartsForm] = (await db
@@ -53,7 +58,8 @@ async function main() {
     .values({
       creatorId: userId,
       title: "Hogwarts House Sorting Ceremony",
-      description: "Step up, don the Sorting Hat, and discover your true magical house. Hogwarts awaits your loyalty, courage, wisdom, or ambition.",
+      description:
+        "Step up, don the Sorting Hat, and discover your true magical house. Hogwarts awaits your loyalty, courage, wisdom, or ambition.",
       status: "published",
       visibility: "public",
       theme: "hogwarts",
@@ -118,7 +124,8 @@ async function main() {
     .values({
       creatorId: userId,
       title: "Night City Anomaly Registry (Glitch Report)",
-      description: "Choombas, got a cyberware malfunction or rendering glitch in Watson? Report it here so the Netwatch agents can clean the subnet.",
+      description:
+        "Choombas, got a cyberware malfunction or rendering glitch in Watson? Report it here so the Netwatch agents can clean the subnet.",
       status: "published",
       visibility: "public",
       theme: "cyberpunk",
@@ -167,7 +174,8 @@ async function main() {
       formId: cyberpunkForm.id,
       type: "long_text",
       label: "Describe the glitch in detail (or leave a message for Johnny Silverhand):",
-      placeholder: "e.g., textures didn't load, fell through the elevator, Johnny called me a sellout...",
+      placeholder:
+        "e.g., textures didn't load, fell through the elevator, Johnny called me a sellout...",
       required: true,
       orderIndex: 3,
     },
@@ -182,7 +190,8 @@ async function main() {
     .values({
       creatorId: userId,
       title: "Y-Combinator Summer 2026 Pitch",
-      description: "Pitch your startup. We fund creators building type-safe form builders and scalable SaaS platforms. Tell us about your metrics.",
+      description:
+        "Pitch your startup. We fund creators building type-safe form builders and scalable SaaS platforms. Tell us about your metrics.",
       status: "published",
       visibility: "unlisted",
       theme: "startup",
@@ -313,9 +322,7 @@ async function main() {
       } else if (field.type === "checkbox") {
         // Randomly select multiple options
         const opts = field.options as Array<any>;
-        answerVal = opts
-          .filter(() => Math.random() > 0.5)
-          .map((o) => o.value);
+        answerVal = opts.filter(() => Math.random() > 0.5).map((o) => o.value);
         if (answerVal.length === 0) answerVal = [opts[0].value];
       } else if (field.type === "long_text") {
         answerVal = cpGlitches[Math.floor(Math.random() * cpGlitches.length)];

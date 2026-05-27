@@ -1,9 +1,5 @@
 import { db, eq, and, desc, count, sql } from "@repo/database";
-import {
-  usersTable,
-  formsTable,
-  responsesTable,
-} from "@repo/database/schema";
+import { usersTable, formsTable, responsesTable } from "@repo/database/schema";
 import { TRPCError } from "@trpc/server";
 
 export class AdminService {
@@ -13,10 +9,7 @@ export class AdminService {
       db.select({ count: count() }).from(usersTable),
       db.select({ count: count() }).from(formsTable),
       db.select({ count: count() }).from(responsesTable),
-      db
-        .select({ count: count() })
-        .from(responsesTable)
-        .where(eq(responsesTable.completed, true)),
+      db.select({ count: count() }).from(responsesTable).where(eq(responsesTable.completed, true)),
     ]);
 
     return {

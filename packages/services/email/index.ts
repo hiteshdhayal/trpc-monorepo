@@ -51,7 +51,7 @@ export const emailService = {
   async sendThankYou(
     to: string,
     formTitle: string,
-    answers: Array<{ label: string; answer: any }>
+    answers: Array<{ label: string; answer: any }>,
   ): Promise<void> {
     const answersHtml = answers
       .map(
@@ -61,7 +61,7 @@ export const emailService = {
         <td style="padding:10px 16px;border-bottom:1px solid #1f1f1f;color:#ffffff;font-size:13px">${
           Array.isArray(a.answer) ? a.answer.join(", ") : String(a.answer ?? "—")
         }</td>
-      </tr>`
+      </tr>`,
       )
       .join("");
 
@@ -100,7 +100,7 @@ export const emailService = {
   async sendNewResponseNotification(
     creatorEmail: string,
     formTitle: string,
-    respondentEmail?: string
+    respondentEmail?: string,
   ): Promise<void> {
     await sendEmail({
       to: creatorEmail,

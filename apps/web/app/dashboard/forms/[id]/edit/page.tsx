@@ -106,22 +106,24 @@ export default function FormBuilderPage() {
   const [expandedResponseId, setExpandedResponseId] = useState<string | null>(null);
 
   // 1. Fetch form data
-  const { data: form, isLoading: formLoading, error: formError } = trpc.form.getFormById.useQuery(
-    { id: formId },
-    { retry: false }
-  );
+  const {
+    data: form,
+    isLoading: formLoading,
+    error: formError,
+  } = trpc.form.getFormById.useQuery({ id: formId }, { retry: false });
 
   // 2. Fetch Analytics
   const { data: analytics, isLoading: analyticsLoading } = trpc.form.getFormAnalytics.useQuery(
     { formId },
-    { enabled: activeTab === "analytics", refetchOnWindowFocus: false }
+    { enabled: activeTab === "analytics", refetchOnWindowFocus: false },
   );
 
   // 3. Fetch paginated responses
-  const { data: responsesData, isLoading: responsesLoading } = trpc.form.getResponsesPaginated.useQuery(
-    { formId, page: responsesPage, limit: 20, completedOnly },
-    { enabled: activeTab === "responses", refetchOnWindowFocus: false }
-  );
+  const { data: responsesData, isLoading: responsesLoading } =
+    trpc.form.getResponsesPaginated.useQuery(
+      { formId, page: responsesPage, limit: 20, completedOnly },
+      { enabled: activeTab === "responses", refetchOnWindowFocus: false },
+    );
 
   // Populate local states once form is loaded
   useEffect(() => {
@@ -143,7 +145,7 @@ export default function FormBuilderPage() {
           options: f.options,
           validationRules: f.validationRules,
           conditionalLogic: f.conditionalLogic,
-        }))
+        })),
       );
       if (form.responseLimit) {
         setEnableLimit(true);
@@ -276,7 +278,13 @@ export default function FormBuilderPage() {
       placeholder: type === "select" || type === "checkbox" ? null : "Type your answer here...",
       required: true,
       orderIndex: fields.length,
-      options: type === "select" || type === "checkbox" ? [{ label: "Option 1", value: "opt_1" }, { label: "Option 2", value: "opt_2" }] : null,
+      options:
+        type === "select" || type === "checkbox"
+          ? [
+              { label: "Option 1", value: "opt_1" },
+              { label: "Option 2", value: "opt_2" },
+            ]
+          : null,
       validationRules: type === "rating" ? { min: 1, max: 5 } : null,
     };
 
@@ -386,26 +394,42 @@ export default function FormBuilderPage() {
             </Link>
             <div className="h-6 w-px bg-[#D4C9B0]" />
             <div>
-              <h1 className="text-sm font-serif font-bold text-[#1A1008] truncate max-w-xs sm:max-w-sm md:max-w-md">{title}</h1>
-              <p className="text-[10px] text-[#C41E3A] font-semibold uppercase tracking-wider">{theme} theme</p>
+              <h1 className="text-sm font-serif font-bold text-[#1A1008] truncate max-w-xs sm:max-w-sm md:max-w-md">
+                {title}
+              </h1>
+              <p className="text-[10px] text-[#C41E3A] font-semibold uppercase tracking-wider">
+                {theme} theme
+              </p>
             </div>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
             <TabsList className="bg-[#EDE8DC] border border-[#D4C9B0] p-0.5 rounded-lg">
-              <TabsTrigger value="build" className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none">
+              <TabsTrigger
+                value="build"
+                className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none"
+              >
                 <Sparkles className="h-3.5 w-3.5" />
                 Build
               </TabsTrigger>
-              <TabsTrigger value="settings" className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none">
+              <TabsTrigger
+                value="settings"
+                className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none"
+              >
                 <SettingsIcon className="h-3.5 w-3.5" />
                 Settings
               </TabsTrigger>
-              <TabsTrigger value="responses" className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none">
+              <TabsTrigger
+                value="responses"
+                className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none"
+              >
                 <Users2 className="h-3.5 w-3.5" />
                 Responses
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none">
+              <TabsTrigger
+                value="analytics"
+                className="text-xs px-3 py-1 cursor-pointer flex items-center gap-1.5 data-[state=active]:bg-[#C41E3A] data-[state=active]:text-white text-[#6B5744] data-[state=active]:shadow-none"
+              >
                 <BarChart2 className="h-3.5 w-3.5" />
                 Analytics
               </TabsTrigger>
@@ -414,7 +438,11 @@ export default function FormBuilderPage() {
 
           <div className="flex items-center gap-2">
             <Link href={`/forms/${formId}`} target="_blank">
-              <Button variant="ghost" size="sm" className="text-xs text-[#6B5744] hover:text-[#1A1008] flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-[#6B5744] hover:text-[#1A1008] flex items-center gap-1"
+              >
                 <Eye className="h-3.5 w-3.5" />
                 View Form
               </Button>
@@ -426,25 +454,32 @@ export default function FormBuilderPage() {
       {/* Main workspace */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         <Tabs value={activeTab} className="flex-1 flex flex-col md:flex-row">
-          
           {/* TAB 1: BUILD WORKSPACE */}
-          <TabsContent value="build" className="flex-1 flex flex-col md:flex-row m-0 p-0 overflow-y-auto bg-[#F5F0E8]">
+          <TabsContent
+            value="build"
+            className="flex-1 flex flex-col md:flex-row m-0 p-0 overflow-y-auto bg-[#F5F0E8]"
+          >
             {/* Warning banner: published form with responses */}
             {form?.status !== "draft" && (analytics?.summary?.totalResponses ?? 0) > 0 && (
               <div className="w-full bg-[rgba(196,30,58,0.06)] border-b border-[#C41E3A]/30 px-4 py-3 flex items-center gap-3">
                 <AlertTriangle className="h-4 w-4 text-[#C41E3A] shrink-0" />
                 <p className="text-xs text-[#8B1A2A]">
-                  <strong>This form is {form?.status} and has {analytics?.summary?.totalResponses} response(s).</strong>{" "}
-                  Adding or removing fields is locked to prevent data corruption. Clone the form to make structural changes.
+                  <strong>
+                    This form is {form?.status} and has {analytics?.summary?.totalResponses}{" "}
+                    response(s).
+                  </strong>{" "}
+                  Adding or removing fields is locked to prevent data corruption. Clone the form to
+                  make structural changes.
                 </p>
               </div>
             )}
             {/* Left Config Panel */}
             <div className="w-full md:w-[450px] border-r border-[#D4C9B0] bg-[#FAF7F2] p-6 flex flex-col gap-6 select-none">
-              
               {/* Toolbar: Field adder */}
               <div>
-                <h3 className="text-xs font-serif font-bold uppercase text-[#6B5744] tracking-wider mb-3">Add Fields</h3>
+                <h3 className="text-xs font-serif font-bold uppercase text-[#6B5744] tracking-wider mb-3">
+                  Add Fields
+                </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { type: "short_text", label: "Short Text" },
@@ -473,7 +508,9 @@ export default function FormBuilderPage() {
               {/* Questions List */}
               <div className="flex-1 flex flex-col min-h-[250px]">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-serif font-bold uppercase text-[#6B5744] tracking-wider">Questions Stack</h3>
+                  <h3 className="text-xs font-serif font-bold uppercase text-[#6B5744] tracking-wider">
+                    Questions Stack
+                  </h3>
                   <Button
                     size="sm"
                     className="bg-[#C41E3A] hover:bg-[#8B1A2A] text-white text-[10px] h-6 cursor-pointer"
@@ -503,19 +540,25 @@ export default function FormBuilderPage() {
                           }`}
                         >
                           <div className="truncate flex-1 pr-2">
-                            <span className="text-[10px] text-[#C41E3A] font-serif font-bold mr-1.5">{idx + 1}.</span>
-                            <span className="text-xs font-medium text-[#1A1008]">{field.label}</span>
-                            <div className="text-[9px] text-[#6B5744] uppercase mt-0.5 font-mono">{field.type}</div>
+                            <span className="text-[10px] text-[#C41E3A] font-serif font-bold mr-1.5">
+                              {idx + 1}.
+                            </span>
+                            <span className="text-xs font-medium text-[#1A1008]">
+                              {field.label}
+                            </span>
+                            <div className="text-[9px] text-[#6B5744] uppercase mt-0.5 font-mono">
+                              {field.type}
+                            </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               size="icon"
                               variant="ghost"
                               className="h-6 w-6 text-[#6B5744] hover:text-[#1A1008] cursor-pointer"
                               onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleMoveField(idx, "up");
+                                e.stopPropagation();
+                                handleMoveField(idx, "up");
                               }}
                               disabled={idx === 0}
                             >
@@ -526,8 +569,8 @@ export default function FormBuilderPage() {
                               variant="ghost"
                               className="h-6 w-6 text-[#6B5744] hover:text-[#1A1008] cursor-pointer"
                               onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleMoveField(idx, "down");
+                                e.stopPropagation();
+                                handleMoveField(idx, "down");
                               }}
                               disabled={idx === fields.length - 1}
                             >
@@ -538,8 +581,8 @@ export default function FormBuilderPage() {
                               variant="ghost"
                               className="h-6 w-6 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer"
                               onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteField(idx);
+                                e.stopPropagation();
+                                handleDeleteField(idx);
                               }}
                             >
                               <Trash2 className="h-3 w-3" />
@@ -595,7 +638,9 @@ export default function FormBuilderPage() {
                       <div className="space-y-2">
                         <Label className="text-[#6B5744] text-xs">Answer Options</Label>
                         <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                          {(selectedField.options as Array<{ label: string; value: string }> || []).map((opt, oIdx) => (
+                          {(
+                            (selectedField.options as Array<{ label: string; value: string }>) || []
+                          ).map((opt, oIdx) => (
                             <div key={oIdx} className="flex items-center gap-1.5">
                               <Input
                                 className="bg-[#FAF7F2] border-[#D4C9B0] text-xs text-[#1A1008] h-8"
@@ -617,7 +662,9 @@ export default function FormBuilderPage() {
                                 variant="ghost"
                                 className="h-8 w-8 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer shrink-0"
                                 onClick={() => {
-                                  const updatedOpts = selectedField.options.filter((_: any, i: number) => i !== oIdx);
+                                  const updatedOpts = selectedField.options.filter(
+                                    (_: any, i: number) => i !== oIdx,
+                                  );
                                   handleUpdateField(selectedFieldIdx, {
                                     ...selectedField,
                                     options: updatedOpts,
@@ -636,7 +683,10 @@ export default function FormBuilderPage() {
                           onClick={() => {
                             const updatedOpts = [
                               ...(selectedField.options || []),
-                              { label: `Option ${(selectedField.options || []).length + 1}`, value: `opt_${Date.now()}` },
+                              {
+                                label: `Option ${(selectedField.options || []).length + 1}`,
+                                value: `opt_${Date.now()}`,
+                              },
                             ];
                             handleUpdateField(selectedFieldIdx, {
                               ...selectedField,
@@ -650,7 +700,12 @@ export default function FormBuilderPage() {
                     )}
 
                     <div className="flex items-center justify-between border-t border-[#D4C9B0] pt-3">
-                      <Label className="text-[#1A1008] text-xs cursor-pointer" htmlFor="required-toggle">Required Question</Label>
+                      <Label
+                        className="text-[#1A1008] text-xs cursor-pointer"
+                        htmlFor="required-toggle"
+                      >
+                        Required Question
+                      </Label>
                       <Switch
                         id="required-toggle"
                         checked={selectedField.required}
@@ -671,7 +726,10 @@ export default function FormBuilderPage() {
             <div className="flex-1 bg-[#F5F0E8] p-8 flex items-center justify-center overflow-y-auto">
               <div className="w-full max-w-xl flex flex-col gap-6 relative">
                 <div className="absolute top-0 right-0">
-                  <Badge variant="outline" className="border-[#D4C9B0] text-[#6B5744] bg-[#FAF7F2]/80 uppercase text-[10px]">
+                  <Badge
+                    variant="outline"
+                    className="border-[#D4C9B0] text-[#6B5744] bg-[#FAF7F2]/80 uppercase text-[10px]"
+                  >
                     Live Simulator Preview
                   </Badge>
                 </div>
@@ -680,7 +738,9 @@ export default function FormBuilderPage() {
                   {fields.length === 0 ? (
                     <div className="min-h-[250px] flex flex-col items-center justify-center text-center">
                       <Layout className="h-10 w-10 text-[#6B5744] mb-3" />
-                      <p className="text-sm font-serif font-semibold text-[#1A1008]">Your form simulator is empty</p>
+                      <p className="text-sm font-serif font-semibold text-[#1A1008]">
+                        Your form simulator is empty
+                      </p>
                       <p className="text-xs text-[#6B5744] max-w-xs mt-1">
                         Add form fields from the left config panel to start seeing live rendering.
                       </p>
@@ -690,7 +750,7 @@ export default function FormBuilderPage() {
                       <div className="text-[10px] uppercase font-bold tracking-wider text-[#C41E3A] mb-2 font-serif">
                         Question {selectedFieldIdx! + 1} of {fields.length}
                       </div>
-                      
+
                       <label className="text-xl font-serif font-bold text-[#1A1008] mb-4 block">
                         {selectedField.label}
                         {selectedField.required && <span className="text-[#C41E3A] ml-1">*</span>}
@@ -742,14 +802,18 @@ export default function FormBuilderPage() {
                       {selectedField.type === "rating" && (
                         <div className="flex items-center gap-1.5 mt-2">
                           {[1, 2, 3, 4, 5].map((s) => (
-                            <span key={s} className="text-2xl text-[#C41E3A]">★</span>
+                            <span key={s} className="text-2xl text-[#C41E3A]">
+                              ★
+                            </span>
                           ))}
                         </div>
                       )}
 
                       {selectedField.type === "select" && (
                         <div className="space-y-2 mt-2">
-                          {(selectedField.options as Array<{ label: string; value: string }> || []).map((o, oIdx) => (
+                          {(
+                            (selectedField.options as Array<{ label: string; value: string }>) || []
+                          ).map((o, oIdx) => (
                             <div
                               key={oIdx}
                               className="p-3 bg-[#FAF7F2] border border-[#D4C9B0] rounded-xl hover:border-[#C41E3A]/40 text-sm font-medium transition-all text-[#1A1008]"
@@ -765,7 +829,9 @@ export default function FormBuilderPage() {
 
                       {selectedField.type === "checkbox" && (
                         <div className="space-y-2 mt-2">
-                          {(selectedField.options as Array<{ label: string; value: string }> || []).map((o, oIdx) => (
+                          {(
+                            (selectedField.options as Array<{ label: string; value: string }>) || []
+                          ).map((o, oIdx) => (
                             <div
                               key={oIdx}
                               className="p-3 bg-[#FAF7F2] border border-[#D4C9B0] rounded-xl hover:border-[#C41E3A]/40 text-sm font-medium transition-all text-[#1A1008] flex items-center gap-3"
@@ -784,7 +850,10 @@ export default function FormBuilderPage() {
           </TabsContent>
 
           {/* TAB 2: SETTINGS PANEL */}
-          <TabsContent value="settings" className="flex-1 max-w-4xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]">
+          <TabsContent
+            value="settings"
+            className="flex-1 max-w-4xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]"
+          >
             <Card className="border-[#D4C9B0] bg-[#FAF7F2] shadow-none p-6">
               <CardHeader className="p-0 pb-6 border-b border-[#D4C9B0] mb-6">
                 <CardTitle className="text-2xl font-serif font-bold flex items-center gap-2 text-[#1A1008]">
@@ -792,7 +861,8 @@ export default function FormBuilderPage() {
                   Form Configuration
                 </CardTitle>
                 <CardDescription className="text-[#6B5744]">
-                  Manage metadata, availability thresholds, custom aliases, and premium styling themes.
+                  Manage metadata, availability thresholds, custom aliases, and premium styling
+                  themes.
                 </CardDescription>
               </CardHeader>
 
@@ -801,7 +871,9 @@ export default function FormBuilderPage() {
                   {/* General */}
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="title" className="text-[#6B5744] text-sm">Form Title</Label>
+                      <Label htmlFor="title" className="text-[#6B5744] text-sm">
+                        Form Title
+                      </Label>
                       <Input
                         id="title"
                         className="bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] focus:border-[#C41E3A]"
@@ -812,7 +884,9 @@ export default function FormBuilderPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="desc" className="text-[#6B5744] text-sm">Description</Label>
+                      <Label htmlFor="desc" className="text-[#6B5744] text-sm">
+                        Description
+                      </Label>
                       <textarea
                         id="desc"
                         className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] rounded-lg p-3 text-sm focus:border-[#C41E3A] outline-none resize-none h-24"
@@ -822,7 +896,9 @@ export default function FormBuilderPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="customSlug" className="text-[#6B5744] text-sm">Custom URL Slug (Optional)</Label>
+                      <Label htmlFor="customSlug" className="text-[#6B5744] text-sm">
+                        Custom URL Slug (Optional)
+                      </Label>
                       <div className="flex items-center gap-1.5 bg-[#FAF7F2] border border-[#D4C9B0] rounded-lg pl-3 overflow-hidden">
                         <span className="text-xs text-[#6B5744] font-mono">/forms/</span>
                         <Input
@@ -830,7 +906,9 @@ export default function FormBuilderPage() {
                           placeholder="my-feedback-form"
                           className="bg-transparent border-0 text-[#1A1008] placeholder-[#A89880] focus:ring-0 pl-0 focus:border-0 h-9"
                           value={customSlug}
-                          onChange={(e) => setCustomSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
+                          onChange={(e) =>
+                            setCustomSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))
+                          }
                         />
                       </div>
                     </div>
@@ -839,7 +917,9 @@ export default function FormBuilderPage() {
                   {/* Status, Visibility, Theme */}
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="themeSelect" className="text-[#6B5744] text-sm">Premium Layout Theme</Label>
+                      <Label htmlFor="themeSelect" className="text-[#6B5744] text-sm">
+                        Premium Layout Theme
+                      </Label>
                       <select
                         id="themeSelect"
                         className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2.5 focus:border-[#C41E3A] outline-none"
@@ -853,7 +933,9 @@ export default function FormBuilderPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="statusSelect" className="text-[#6B5744] text-sm">Publishing Status</Label>
+                      <Label htmlFor="statusSelect" className="text-[#6B5744] text-sm">
+                        Publishing Status
+                      </Label>
                       <select
                         id="statusSelect"
                         className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2.5 focus:border-[#C41E3A] outline-none"
@@ -867,7 +949,9 @@ export default function FormBuilderPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="visibilitySelect" className="text-[#6B5744] text-sm">Visibility Mode</Label>
+                      <Label htmlFor="visibilitySelect" className="text-[#6B5744] text-sm">
+                        Visibility Mode
+                      </Label>
                       <select
                         id="visibilitySelect"
                         className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2.5 focus:border-[#C41E3A] outline-none"
@@ -890,12 +974,23 @@ export default function FormBuilderPage() {
                     {/* Limit responses */}
                     <div className="p-4 rounded-xl border border-[#D4C9B0] bg-[#EDE8DC]/40 space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="enableLimit" className="text-[#1A1008] text-sm cursor-pointer">Restrict Response Count</Label>
-                        <Switch id="enableLimit" checked={enableLimit} onCheckedChange={setEnableLimit} />
+                        <Label
+                          htmlFor="enableLimit"
+                          className="text-[#1A1008] text-sm cursor-pointer"
+                        >
+                          Restrict Response Count
+                        </Label>
+                        <Switch
+                          id="enableLimit"
+                          checked={enableLimit}
+                          onCheckedChange={setEnableLimit}
+                        />
                       </div>
                       {enableLimit && (
                         <div className="space-y-1.5 animate-fadeIn">
-                          <Label className="text-[#6B5744] text-xs">Maximum Allowed Submissions</Label>
+                          <Label className="text-[#6B5744] text-xs">
+                            Maximum Allowed Submissions
+                          </Label>
                           <Input
                             type="number"
                             min="1"
@@ -910,8 +1005,17 @@ export default function FormBuilderPage() {
                     {/* Expiry Date */}
                     <div className="p-4 rounded-xl border border-[#D4C9B0] bg-[#EDE8DC]/40 space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="enableExpiry" className="text-[#1A1008] text-sm cursor-pointer">Set Expiration Date</Label>
-                        <Switch id="enableExpiry" checked={enableExpiry} onCheckedChange={setEnableExpiry} />
+                        <Label
+                          htmlFor="enableExpiry"
+                          className="text-[#1A1008] text-sm cursor-pointer"
+                        >
+                          Set Expiration Date
+                        </Label>
+                        <Switch
+                          id="enableExpiry"
+                          checked={enableExpiry}
+                          onCheckedChange={setEnableExpiry}
+                        />
                       </div>
                       {enableExpiry && (
                         <div className="space-y-1.5 animate-fadeIn">
@@ -936,7 +1040,9 @@ export default function FormBuilderPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div className="space-y-3">
-                      <p className="text-xs text-[#6B5744]">Share your form via link or QR code for instant mobile access.</p>
+                      <p className="text-xs text-[#6B5744]">
+                        Share your form via link or QR code for instant mobile access.
+                      </p>
                       <div className="flex items-center gap-2">
                         <Input
                           readOnly
@@ -997,7 +1103,9 @@ export default function FormBuilderPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-[#C41E3A]" />
-                  <CardTitle className="text-base font-serif text-[#1A1008]">Password Protection</CardTitle>
+                  <CardTitle className="text-base font-serif text-[#1A1008]">
+                    Password Protection
+                  </CardTitle>
                 </div>
                 <CardDescription className="text-[#6B5744] text-xs">
                   Require respondents to enter a password before viewing this form.
@@ -1008,7 +1116,9 @@ export default function FormBuilderPage() {
                   <div className="flex items-center justify-between bg-[rgba(196,30,58,0.06)] border border-[#C41E3A]/20 rounded-lg p-4">
                     <div className="flex items-center gap-2">
                       <KeyRound className="h-4 w-4 text-[#C41E3A]" />
-                      <span className="text-sm font-medium text-[#1A1008]">Password protection is active</span>
+                      <span className="text-sm font-medium text-[#1A1008]">
+                        Password protection is active
+                      </span>
                     </div>
                     <Button
                       variant="outline"
@@ -1017,7 +1127,11 @@ export default function FormBuilderPage() {
                       onClick={handleRemovePassword}
                       disabled={passwordSaving}
                     >
-                      {passwordSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Remove Password"}
+                      {passwordSaving ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        "Remove Password"
+                      )}
                     </Button>
                   </div>
                 ) : (
@@ -1061,17 +1175,27 @@ export default function FormBuilderPage() {
           </TabsContent>
 
           {/* TAB 3: RESPONSES PANEL */}
-          <TabsContent value="responses" className="flex-1 max-w-6xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]">
+          <TabsContent
+            value="responses"
+            className="flex-1 max-w-6xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]"
+          >
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-serif font-bold text-[#1A1008]">Response Submissions</h2>
-                  <p className="text-[#6B5744] text-sm">Browse and inspect individual form submissions.</p>
+                  <h2 className="text-2xl font-serif font-bold text-[#1A1008]">
+                    Response Submissions
+                  </h2>
+                  <p className="text-[#6B5744] text-sm">
+                    Browse and inspect individual form submissions.
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => { setCompletedOnly(!completedOnly); setResponsesPage(1); }}
+                    onClick={() => {
+                      setCompletedOnly(!completedOnly);
+                      setResponsesPage(1);
+                    }}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border cursor-pointer transition-colors ${
                       completedOnly
                         ? "bg-[#C41E3A]/10 border-[#C41E3A]/30 text-[#C41E3A]"
@@ -1099,10 +1223,17 @@ export default function FormBuilderPage() {
               ) : responsesData && responsesData.responses.length > 0 ? (
                 <div className="space-y-3">
                   {responsesData.responses.map((response) => (
-                    <Card key={response.id} className="border-[#D4C9B0] bg-[#FAF7F2] shadow-none overflow-hidden">
+                    <Card
+                      key={response.id}
+                      className="border-[#D4C9B0] bg-[#FAF7F2] shadow-none overflow-hidden"
+                    >
                       <div
                         className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#EDE8DC] transition-colors"
-                        onClick={() => setExpandedResponseId(expandedResponseId === response.id ? null : response.id)}
+                        onClick={() =>
+                          setExpandedResponseId(
+                            expandedResponseId === response.id ? null : response.id,
+                          )
+                        }
                       >
                         <div className="flex items-center gap-3">
                           {response.completed ? (
@@ -1136,16 +1267,23 @@ export default function FormBuilderPage() {
                       {expandedResponseId === response.id && (
                         <div className="border-t border-[#D4C9B0] px-4 py-3 bg-[#F5F0E8] space-y-2">
                           {responsesData.fields.map((field) => {
-                            const ans = response.answers.find((a) => a.fieldId === field.id)?.answer;
-                            const displayAns = ans === undefined || ans === null
-                              ? <span className="text-[#A89880] italic">No answer</span>
-                              : Array.isArray(ans)
-                              ? ans.join(", ")
-                              : String(ans);
+                            const ans = response.answers.find(
+                              (a) => a.fieldId === field.id,
+                            )?.answer;
+                            const displayAns =
+                              ans === undefined || ans === null ? (
+                                <span className="text-[#A89880] italic">No answer</span>
+                              ) : Array.isArray(ans) ? (
+                                ans.join(", ")
+                              ) : (
+                                String(ans)
+                              );
 
                             return (
                               <div key={field.id} className="flex gap-3">
-                                <span className="text-xs font-medium text-[#6B5744] min-w-[120px] truncate shrink-0">{field.label}:</span>
+                                <span className="text-xs font-medium text-[#6B5744] min-w-[120px] truncate shrink-0">
+                                  {field.label}:
+                                </span>
                                 <span className="text-xs text-[#1A1008] flex-1">{displayAns}</span>
                               </div>
                             );
@@ -1159,7 +1297,9 @@ export default function FormBuilderPage() {
                   {responsesData.pagination.totalPages > 1 && (
                     <div className="flex items-center justify-between pt-4">
                       <p className="text-xs text-[#6B5744]">
-                        Showing {((responsesPage - 1) * 20) + 1}–{Math.min(responsesPage * 20, responsesData.pagination.total)} of {responsesData.pagination.total} responses
+                        Showing {(responsesPage - 1) * 20 + 1}–
+                        {Math.min(responsesPage * 20, responsesData.pagination.total)} of{" "}
+                        {responsesData.pagination.total} responses
                       </p>
                       <div className="flex items-center gap-2">
                         <Button
@@ -1171,12 +1311,18 @@ export default function FormBuilderPage() {
                         >
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <span className="text-xs text-[#6B5744]">Page {responsesPage} / {responsesData.pagination.totalPages}</span>
+                        <span className="text-xs text-[#6B5744]">
+                          Page {responsesPage} / {responsesData.pagination.totalPages}
+                        </span>
                         <Button
                           size="sm"
                           variant="outline"
                           className="h-8 border-[#D4C9B0] text-[#6B5744] cursor-pointer"
-                          onClick={() => setResponsesPage((p) => Math.min(responsesData.pagination.totalPages, p + 1))}
+                          onClick={() =>
+                            setResponsesPage((p) =>
+                              Math.min(responsesData.pagination.totalPages, p + 1),
+                            )
+                          }
                           disabled={responsesPage >= responsesData.pagination.totalPages}
                         >
                           <ChevronRight className="h-4 w-4" />
@@ -1189,24 +1335,32 @@ export default function FormBuilderPage() {
                 <div className="text-center py-12 text-[#6B5744] border border-dashed border-[#D4C9B0] rounded-xl bg-[#FAF7F2]">
                   <Users2 className="h-8 w-8 mx-auto mb-3 text-[#A89880]" />
                   <p className="font-serif font-semibold text-[#1A1008]">No responses yet</p>
-                  <p className="text-sm mt-1">Once people fill out this form, their submissions will appear here.</p>
+                  <p className="text-sm mt-1">
+                    Once people fill out this form, their submissions will appear here.
+                  </p>
                 </div>
               )}
             </div>
           </TabsContent>
-          <TabsContent value="analytics" className="flex-1 max-w-6xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]">
+          <TabsContent
+            value="analytics"
+            className="flex-1 max-w-6xl mx-auto p-8 overflow-y-auto m-0 bg-[#F5F0E8]"
+          >
             {analyticsLoading ? (
               <div className="min-h-[300px] flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-[#C41E3A]" />
               </div>
             ) : analytics ? (
               <div className="space-y-6">
-                
                 {/* Header info & export */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-serif font-bold text-[#1A1008]">Analytics Report</h2>
-                    <p className="text-[#6B5744] text-sm">Response rates, funnel drops, and answer aggregates.</p>
+                    <h2 className="text-2xl font-serif font-bold text-[#1A1008]">
+                      Analytics Report
+                    </h2>
+                    <p className="text-[#6B5744] text-sm">
+                      Response rates, funnel drops, and answer aggregates.
+                    </p>
                   </div>
 
                   <Button
@@ -1221,27 +1375,39 @@ export default function FormBuilderPage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <Card className="border-[#D4C9B0] bg-[#FAF7F2] p-5 flex flex-col justify-between shadow-none border-t-4 border-t-[#1A1008]">
-                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">Total Responses</span>
+                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">
+                      Total Responses
+                    </span>
                     <span className="text-4xl font-extrabold text-[#1A1008] mt-2">
                       {analytics.summary.totalResponses}
                     </span>
-                    <span className="text-[10px] text-[#6B5744] mt-1">Including partial & draft progress</span>
+                    <span className="text-[10px] text-[#6B5744] mt-1">
+                      Including partial & draft progress
+                    </span>
                   </Card>
 
                   <Card className="border-[#D4C9B0] bg-[#FAF7F2] p-5 flex flex-col justify-between shadow-none border-t-4 border-t-[#C41E3A]">
-                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">Completed Responses</span>
+                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">
+                      Completed Responses
+                    </span>
                     <span className="text-4xl font-extrabold text-[#C41E3A] mt-2">
                       {analytics.summary.completedResponses}
                     </span>
-                    <span className="text-[10px] text-[#6B5744] mt-1">Fully answered all required questions</span>
+                    <span className="text-[10px] text-[#6B5744] mt-1">
+                      Fully answered all required questions
+                    </span>
                   </Card>
 
                   <Card className="border-[#D4C9B0] bg-[#FAF7F2] p-5 flex flex-col justify-between shadow-none border-t-4 border-t-[#A89880]">
-                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">Completion Rate</span>
+                    <span className="text-[#6B5744] text-xs font-semibold uppercase tracking-wider">
+                      Completion Rate
+                    </span>
                     <span className="text-4xl font-extrabold text-[#1A1008] mt-2">
                       {analytics.summary.completionRate.toFixed(1)}%
                     </span>
-                    <span className="text-[10px] text-[#6B5744] mt-1">Ratio of completed to total views</span>
+                    <span className="text-[10px] text-[#6B5744] mt-1">
+                      Ratio of completed to total views
+                    </span>
                   </Card>
                 </div>
 
@@ -1254,7 +1420,10 @@ export default function FormBuilderPage() {
                   <div className="h-80 w-full mt-2">
                     {analytics.timeline && analytics.timeline.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={analytics.timeline} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                        <LineChart
+                          data={analytics.timeline}
+                          margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" stroke="#EDE8DC" vertical={false} />
                           <XAxis
                             dataKey="date"
@@ -1304,16 +1473,40 @@ export default function FormBuilderPage() {
 
                   <div className="h-80 w-full mt-2">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={analytics.funnel} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <XAxis dataKey="label" stroke="#6B5744" fontSize={11} tickFormatter={(t) => t.substring(0, 15) + (t.length > 15 ? "..." : "")} />
-                        <YAxis stroke="#6B5744" fontSize={11} label={{ value: "Users Reached", angle: -90, position: "insideLeft", fill: "#6B5744" }} />
+                      <BarChart
+                        data={analytics.funnel}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <XAxis
+                          dataKey="label"
+                          stroke="#6B5744"
+                          fontSize={11}
+                          tickFormatter={(t) => t.substring(0, 15) + (t.length > 15 ? "..." : "")}
+                        />
+                        <YAxis
+                          stroke="#6B5744"
+                          fontSize={11}
+                          label={{
+                            value: "Users Reached",
+                            angle: -90,
+                            position: "insideLeft",
+                            fill: "#6B5744",
+                          }}
+                        />
                         <ChartTooltip
-                          contentStyle={{ backgroundColor: "#FAF7F2", borderColor: "#D4C9B0", color: "#1A1008" }}
+                          contentStyle={{
+                            backgroundColor: "#FAF7F2",
+                            borderColor: "#D4C9B0",
+                            color: "#1A1008",
+                          }}
                           cursor={{ fill: "rgba(196, 30, 58, 0.03)" }}
                         />
                         <Bar dataKey="reached" fill="#C41E3A" radius={[6, 6, 0, 0]}>
                           {analytics.funnel.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={CHART_COLORS[index % CHART_COLORS.length]}
+                            />
                           ))}
                         </Bar>
                       </BarChart>
@@ -1325,10 +1518,14 @@ export default function FormBuilderPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Object.entries(analytics.distributions).map(([fieldId, optionsArr_]) => {
                     const optionsArr = (optionsArr_ ?? []) as { option: string; count: number }[];
-                    const fieldLabel = fields.find((f) => f.id === fieldId)?.label || "Question Option Chart";
-                    
+                    const fieldLabel =
+                      fields.find((f) => f.id === fieldId)?.label || "Question Option Chart";
+
                     return (
-                      <Card key={fieldId} className="border-[#D4C9B0] bg-[#FAF7F2] p-6 flex flex-col shadow-none">
+                      <Card
+                        key={fieldId}
+                        className="border-[#D4C9B0] bg-[#FAF7F2] p-6 flex flex-col shadow-none"
+                      >
                         <h4 className="text-xs font-serif font-semibold uppercase text-[#6B5744] tracking-wider mb-4 line-clamp-1">
                           {fieldLabel}
                         </h4>
@@ -1341,17 +1538,27 @@ export default function FormBuilderPage() {
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}
-                                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                label={({ name, percent }) =>
+                                  `${name} (${(percent * 100).toFixed(0)}%)`
+                                }
                                 outerRadius={80}
                                 fill="#8884d8"
                                 dataKey="count"
                                 nameKey="option"
                               >
                                 {optionsArr.map((_, index) => (
-                                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                                  />
                                 ))}
                               </Pie>
-                              <ChartTooltip contentStyle={{ backgroundColor: "#FAF7F2", borderColor: "#D4C9B0" }} />
+                              <ChartTooltip
+                                contentStyle={{
+                                  backgroundColor: "#FAF7F2",
+                                  borderColor: "#D4C9B0",
+                                }}
+                              />
                             </PieChart>
                           </ResponsiveContainer>
                         </div>
@@ -1364,7 +1571,6 @@ export default function FormBuilderPage() {
               <div className="text-center py-12 text-[#6B5744]">No analytics data available.</div>
             )}
           </TabsContent>
-
         </Tabs>
       </div>
     </div>

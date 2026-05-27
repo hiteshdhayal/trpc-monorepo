@@ -14,10 +14,7 @@ export const tRPCContext = initTRPC
         ...shape,
         data: {
           ...shape.data,
-          zodError:
-            error.cause instanceof ZodError
-              ? error.cause.flatten()
-              : null,
+          zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
         },
       };
     },
@@ -58,4 +55,3 @@ export const isAdminMiddleware = tRPCContext.middleware(async ({ ctx, next }) =>
 });
 
 export const adminProcedure = tRPCContext.procedure.use(isAdminMiddleware);
-

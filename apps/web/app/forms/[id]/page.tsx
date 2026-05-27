@@ -58,10 +58,11 @@ export default function PublicFormFillerPage() {
   const [honeypot, setHoneypot] = useState("");
 
   // Fetch form fields
-  const { data: form, isLoading, error } = trpc.form.getFormById.useQuery(
-    { id: formId },
-    { retry: false, refetchOnWindowFocus: false }
-  );
+  const {
+    data: form,
+    isLoading,
+    error,
+  } = trpc.form.getFormById.useQuery({ id: formId }, { retry: false, refetchOnWindowFocus: false });
 
   // Sync partial progress mutation
   const partialSyncMutation = trpc.form.startOrUpdateResponse.useMutation({
@@ -166,7 +167,8 @@ export default function PublicFormFillerPage() {
           card: "bg-[#FAF7F2] border-[#D4C9B0] shadow-none",
           accent: "text-[#C41E3A]",
           button: "bg-[#C41E3A] hover:bg-[#8B1A2A] text-white font-semibold",
-          input: "bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
+          input:
+            "bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
           option: "bg-[#FAF7F2] border-[#D4C9B0] hover:border-[#C41E3A]/40 text-[#6B5744]",
           optionActive: "bg-[rgba(196,30,58,0.08)] border-[#C41E3A] text-[#1A1008]",
           progress: "bg-[#C41E3A]",
@@ -177,7 +179,8 @@ export default function PublicFormFillerPage() {
           card: "bg-[#FAF7F2] border-2 border-[#1A1008] shadow-none",
           accent: "text-[#C41E3A]",
           button: "bg-[#1A1008] hover:bg-[#C41E3A] text-white font-bold uppercase",
-          input: "bg-[#FAF7F2] border-2 border-[#1A1008] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
+          input:
+            "bg-[#FAF7F2] border-2 border-[#1A1008] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
           option: "bg-[#FAF7F2] border border-[#D4C9B0] hover:border-[#1A1008] text-[#6B5744]",
           optionActive: "bg-[rgba(196,30,58,0.08)] border-2 border-[#C41E3A] text-[#1A1008]",
           progress: "bg-[#C41E3A]",
@@ -189,7 +192,8 @@ export default function PublicFormFillerPage() {
           card: "bg-[#FAF7F2] border-[#D4C9B0] shadow-none",
           accent: "text-[#C41E3A]",
           button: "bg-[#C41E3A] hover:bg-[#8B1A2A] text-white font-medium",
-          input: "bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
+          input:
+            "bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] focus:border-[#C41E3A]",
           option: "bg-[#FAF7F2] border-[#D4C9B0] hover:border-[#C41E3A]/40 text-[#6B5744]",
           optionActive: "bg-[rgba(196,30,58,0.08)] border-[#C41E3A] text-[#1A1008]",
           progress: "bg-[#C41E3A]",
@@ -211,7 +215,13 @@ export default function PublicFormFillerPage() {
 
     if (currentField) {
       const val = answers[currentField.id];
-      if (currentField.required && (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0))) {
+      if (
+        currentField.required &&
+        (val === undefined ||
+          val === null ||
+          val === "" ||
+          (Array.isArray(val) && val.length === 0))
+      ) {
         toast.error(`"${currentField.label}" is required.`);
         return false;
       }
@@ -259,7 +269,18 @@ export default function PublicFormFillerPage() {
         honeypot, // trap bots
       });
     }
-  }, [currentStep, currentField, answers, responseId, respondentEmail, honeypot, visibleFields, formId, partialSyncMutation, submitFormMutation]);
+  }, [
+    currentStep,
+    currentField,
+    answers,
+    responseId,
+    respondentEmail,
+    honeypot,
+    visibleFields,
+    formId,
+    partialSyncMutation,
+    submitFormMutation,
+  ]);
 
   const handlePrev = () => {
     if (currentStep > 0) {
@@ -274,9 +295,7 @@ export default function PublicFormFillerPage() {
 
   const handleCheckboxOption = (fieldId: string, val: string) => {
     const current = (answers[fieldId] as Array<string>) || [];
-    const updated = current.includes(val)
-      ? current.filter((x) => x !== val)
-      : [...current, val];
+    const updated = current.includes(val) ? current.filter((x) => x !== val) : [...current, val];
     setAnswers({ ...answers, [fieldId]: updated });
   };
 
@@ -288,7 +307,7 @@ export default function PublicFormFillerPage() {
         handleNext();
       }
     },
-    [handleNext]
+    [handleNext],
   );
 
   const progressPct = (currentStep / totalSteps) * 100;
@@ -335,14 +354,19 @@ export default function PublicFormFillerPage() {
               <AlertCircle className="h-7 w-7 text-[#C41E3A]" />
             </div>
             <h2 className="text-xl font-serif font-bold">Form Expired</h2>
-            <p className="text-[#6B5744] text-sm">This form is no longer accepting responses because its expiry date has passed.</p>
+            <p className="text-[#6B5744] text-sm">
+              This form is no longer accepting responses because its expiry date has passed.
+            </p>
           </div>
         </div>
       );
     }
 
     // Case: Form unpublished / draft
-    if (errorMessage.toLowerCase().includes("not accepting") || errorMessage.toLowerCase().includes("draft")) {
+    if (
+      errorMessage.toLowerCase().includes("not accepting") ||
+      errorMessage.toLowerCase().includes("draft")
+    ) {
       return (
         <div className="min-h-screen bg-[#F5F0E8] text-[#1A1008] flex flex-col items-center justify-center p-4">
           <div className="bg-[#FAF7F2] border border-[#D4C9B0] rounded-2xl p-8 max-w-sm text-center space-y-3">
@@ -350,14 +374,20 @@ export default function PublicFormFillerPage() {
               <Lock className="h-7 w-7 text-[#C41E3A]" />
             </div>
             <h2 className="text-xl font-serif font-bold">Form Unpublished</h2>
-            <p className="text-[#6B5744] text-sm">This form is not currently published and is not accepting responses. Please contact the form creator.</p>
+            <p className="text-[#6B5744] text-sm">
+              This form is not currently published and is not accepting responses. Please contact
+              the form creator.
+            </p>
           </div>
         </div>
       );
     }
 
     // Case: Form closed (response limit reached)
-    if (errorMessage.toLowerCase().includes("response limit") || errorMessage.toLowerCase().includes("closed")) {
+    if (
+      errorMessage.toLowerCase().includes("response limit") ||
+      errorMessage.toLowerCase().includes("closed")
+    ) {
       return (
         <div className="min-h-screen bg-[#F5F0E8] text-[#1A1008] flex flex-col items-center justify-center p-4">
           <div className="bg-[#FAF7F2] border border-[#D4C9B0] rounded-2xl p-8 max-w-sm text-center space-y-3">
@@ -365,7 +395,10 @@ export default function PublicFormFillerPage() {
               <ShieldCheck className="h-7 w-7 text-[#C41E3A]" />
             </div>
             <h2 className="text-xl font-serif font-bold">Form Closed</h2>
-            <p className="text-[#6B5744] text-sm">This form has reached its maximum number of responses and is no longer accepting submissions.</p>
+            <p className="text-[#6B5744] text-sm">
+              This form has reached its maximum number of responses and is no longer accepting
+              submissions.
+            </p>
           </div>
         </div>
       );
@@ -379,7 +412,9 @@ export default function PublicFormFillerPage() {
             <AlertCircle className="h-7 w-7 text-[#C41E3A]" />
           </div>
           <h2 className="text-xl font-serif font-bold">Form Not Found</h2>
-          <p className="text-[#6B5744] text-sm">This form does not exist or has been deleted by its creator.</p>
+          <p className="text-[#6B5744] text-sm">
+            This form does not exist or has been deleted by its creator.
+          </p>
         </div>
       </div>
     );
@@ -396,12 +431,16 @@ export default function PublicFormFillerPage() {
             </div>
             <div>
               <h2 className="text-xl font-serif font-bold text-[#1A1008]">{form.title}</h2>
-              <p className="text-[#6B5744] text-sm mt-1">This form is password protected. Enter the password to continue.</p>
+              <p className="text-[#6B5744] text-sm mt-1">
+                This form is password protected. Enter the password to continue.
+              </p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="form-password" className="text-[#6B5744] text-sm">Password</Label>
+            <Label htmlFor="form-password" className="text-[#6B5744] text-sm">
+              Password
+            </Label>
             <Input
               id="form-password"
               type="password"
@@ -437,23 +476,28 @@ export default function PublicFormFillerPage() {
             disabled={verifyPasswordMutation.isPending || !passwordInput.trim()}
           >
             {verifyPasswordMutation.isPending ? (
-              <><Lock className="h-4 w-4 mr-2 animate-pulse" />Verifying...</>
+              <>
+                <Lock className="h-4 w-4 mr-2 animate-pulse" />
+                Verifying...
+              </>
             ) : (
-              <><ShieldCheck className="h-4 w-4 mr-2" />Unlock Form</>
+              <>
+                <ShieldCheck className="h-4 w-4 mr-2" />
+                Unlock Form
+              </>
             )}
           </Button>
 
-          <p className="text-center text-[10px] text-[#A89880]">
-            Powered by FinalForms
-          </p>
+          <p className="text-center text-[10px] text-[#A89880]">Powered by FinalForms</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between items-center px-4 py-8 relative overflow-hidden ${style.wrapper}`}>
-
+    <div
+      className={`min-h-screen flex flex-col justify-between items-center px-4 py-8 relative overflow-hidden ${style.wrapper}`}
+    >
       {/* Bot spam protection: hidden honeypot field */}
       <input
         type="text"
@@ -488,7 +532,6 @@ export default function PublicFormFillerPage() {
           >
             <Card className={`w-full border p-6 sm:p-8 rounded-2xl ${style.card}`}>
               <CardContent className="p-0" onKeyDown={handleKeyDown}>
-
                 {/* STEP 0: Email / Greeting Screen */}
                 {isIntroScreen && (
                   <div className="space-y-6 text-center sm:text-left">
@@ -497,14 +540,15 @@ export default function PublicFormFillerPage() {
                         {form.title}
                       </h1>
                       {form.description && (
-                        <p className="text-sm text-[#6B5744] leading-relaxed">
-                          {form.description}
-                        </p>
+                        <p className="text-sm text-[#6B5744] leading-relaxed">{form.description}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="respondentEmail" className="text-[#6B5744] text-xs font-semibold block text-left">
+                      <Label
+                        htmlFor="respondentEmail"
+                        className="text-[#6B5744] text-xs font-semibold block text-left"
+                      >
                         Your email address (Optional)
                       </Label>
                       <Input
@@ -523,7 +567,10 @@ export default function PublicFormFillerPage() {
                     <div className="pt-4 flex justify-center sm:justify-start">
                       <Button
                         id="start-form-btn"
-                        onClick={() => { setDirection(1); setCurrentStep(1); }}
+                        onClick={() => {
+                          setDirection(1);
+                          setCurrentStep(1);
+                        }}
                         className={`h-11 px-6 rounded-lg flex items-center gap-2 cursor-pointer ${style.button}`}
                       >
                         Start Form
@@ -537,7 +584,10 @@ export default function PublicFormFillerPage() {
                 {isQuestionScreen && currentField && (
                   <div className="space-y-6">
                     <div className="space-y-1">
-                      <Badge variant="outline" className={`border-[#D4C9B0] text-[10px] uppercase font-mono px-2 py-0.5 ${style.accent}`}>
+                      <Badge
+                        variant="outline"
+                        className={`border-[#D4C9B0] text-[10px] uppercase font-mono px-2 py-0.5 ${style.accent}`}
+                      >
                         Question {currentStep} of {visibleFields.length}
                       </Badge>
                       <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#1A1008] tracking-tight leading-snug mt-2">
@@ -554,17 +604,23 @@ export default function PublicFormFillerPage() {
                           placeholder={currentField.placeholder || "Type your answer here..."}
                           className={`h-11 rounded-lg ${style.input}`}
                           value={answers[currentField.id] || ""}
-                          onChange={(e) => setAnswers({ ...answers, [currentField.id]: e.target.value })}
+                          onChange={(e) =>
+                            setAnswers({ ...answers, [currentField.id]: e.target.value })
+                          }
                         />
                       )}
 
                       {currentField.type === "long_text" && (
                         <textarea
                           id={`field-${currentField.id}`}
-                          placeholder={currentField.placeholder || "Type your detailed answer here..."}
+                          placeholder={
+                            currentField.placeholder || "Type your detailed answer here..."
+                          }
                           className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] placeholder-[#A89880] rounded-lg p-3 text-sm focus:border-[#C41E3A] outline-none resize-none h-32 focus:ring-1"
                           value={answers[currentField.id] || ""}
-                          onChange={(e) => setAnswers({ ...answers, [currentField.id]: e.target.value })}
+                          onChange={(e) =>
+                            setAnswers({ ...answers, [currentField.id]: e.target.value })
+                          }
                           onKeyDown={(e) => {
                             // Don't advance on Enter for textareas (allow newlines with Shift+Enter)
                             if (e.key === "Enter" && !e.shiftKey) {
@@ -581,7 +637,9 @@ export default function PublicFormFillerPage() {
                           placeholder={currentField.placeholder || "name@example.com"}
                           className={`h-11 rounded-lg ${style.input}`}
                           value={answers[currentField.id] || ""}
-                          onChange={(e) => setAnswers({ ...answers, [currentField.id]: e.target.value })}
+                          onChange={(e) =>
+                            setAnswers({ ...answers, [currentField.id]: e.target.value })
+                          }
                         />
                       )}
 
@@ -592,7 +650,9 @@ export default function PublicFormFillerPage() {
                           placeholder={currentField.placeholder || "0"}
                           className={`h-11 rounded-lg ${style.input}`}
                           value={answers[currentField.id] || ""}
-                          onChange={(e) => setAnswers({ ...answers, [currentField.id]: e.target.value })}
+                          onChange={(e) =>
+                            setAnswers({ ...answers, [currentField.id]: e.target.value })
+                          }
                         />
                       )}
 
@@ -602,34 +662,38 @@ export default function PublicFormFillerPage() {
                           type="date"
                           className={`h-11 rounded-lg ${style.input}`}
                           value={answers[currentField.id] || ""}
-                          onChange={(e) => setAnswers({ ...answers, [currentField.id]: e.target.value })}
+                          onChange={(e) =>
+                            setAnswers({ ...answers, [currentField.id]: e.target.value })
+                          }
                         />
                       )}
 
                       {currentField.type === "rating" && (
                         <div className="flex items-center gap-2 mt-2">
                           {[1, 2, 3, 4, 5].map((s) => {
-                             const isSel = (answers[currentField.id] || 0) >= s;
-                             return (
-                               <motion.button
-                                 key={s}
-                                 id={`rating-${currentField.id}-${s}`}
-                                 type="button"
-                                 whileHover={{ scale: 1.2 }}
-                                 whileTap={{ scale: 0.9 }}
-                                 onClick={() => setAnswers({ ...answers, [currentField.id]: s })}
-                                 className={`text-3xl transition-colors cursor-pointer ${isSel ? "text-[#C41E3A]" : "text-[#D4C9B0] hover:text-[#A89880]"}`}
-                               >
-                                 ★
-                               </motion.button>
-                             );
+                            const isSel = (answers[currentField.id] || 0) >= s;
+                            return (
+                              <motion.button
+                                key={s}
+                                id={`rating-${currentField.id}-${s}`}
+                                type="button"
+                                whileHover={{ scale: 1.2 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setAnswers({ ...answers, [currentField.id]: s })}
+                                className={`text-3xl transition-colors cursor-pointer ${isSel ? "text-[#C41E3A]" : "text-[#D4C9B0] hover:text-[#A89880]"}`}
+                              >
+                                ★
+                              </motion.button>
+                            );
                           })}
                         </div>
                       )}
 
                       {currentField.type === "select" && (
                         <div className="space-y-2">
-                          {(currentField.options as Array<{ label: string; value: string }> || []).map((o, oIdx) => {
+                          {(
+                            (currentField.options as Array<{ label: string; value: string }>) || []
+                          ).map((o, oIdx) => {
                             const isActive = answers[currentField.id] === o.value;
                             return (
                               <motion.div
@@ -656,7 +720,9 @@ export default function PublicFormFillerPage() {
 
                       {currentField.type === "checkbox" && (
                         <div className="space-y-2">
-                          {(currentField.options as Array<{ label: string; value: string }> || []).map((o, oIdx) => {
+                          {(
+                            (currentField.options as Array<{ label: string; value: string }>) || []
+                          ).map((o, oIdx) => {
                             const activeArr = (answers[currentField.id] as Array<string>) || [];
                             const isActive = activeArr.includes(o.value);
                             return (
@@ -669,9 +735,13 @@ export default function PublicFormFillerPage() {
                                   isActive ? style.optionActive : style.option
                                 }`}
                               >
-                                <div className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${
-                                  isActive ? "bg-[#C41E3A] border-[#C41E3A]" : "border-[#D4C9B0] bg-[#FAF7F2]"
-                                }`}>
+                                <div
+                                  className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${
+                                    isActive
+                                      ? "bg-[#C41E3A] border-[#C41E3A]"
+                                      : "border-[#D4C9B0] bg-[#FAF7F2]"
+                                  }`}
+                                >
                                   {isActive && <Check className="h-3 w-3 text-white" />}
                                 </div>
                                 <span>{o.label}</span>
@@ -720,7 +790,6 @@ export default function PublicFormFillerPage() {
                     </div>
                   </div>
                 )}
-
               </CardContent>
             </Card>
           </motion.div>

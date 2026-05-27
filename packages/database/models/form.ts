@@ -40,7 +40,7 @@ export const formsTable = pgTable(
     index("forms_creator_id_idx").on(table.creatorId),
     index("forms_status_idx").on(table.status),
     index("forms_archived_idx").on(table.isArchived),
-  ]
+  ],
 );
 
 export const formsRelations = relations(formsTable, ({ one, many }) => ({

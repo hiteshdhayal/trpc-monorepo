@@ -9,12 +9,14 @@
 > **Start here.** Everything you need to evaluate ChaiForms in under 5 minutes.
 
 ### 🔑 Test Credentials
-| Field | Value |
-|---|---|
-| Email | `admin@finalforms.com` |
-| Password | `password123` |
+
+| Field    | Value                  |
+| -------- | ---------------------- |
+| Email    | `admin@finalforms.com` |
+| Password | `password123`          |
 
 ### 🚀 Quickstart
+
 ```bash
 # 1. Install dependencies
 pnpm install
@@ -26,19 +28,21 @@ pnpm --filter @repo/database seed
 # 3. Run everything
 pnpm dev
 ```
+
 - **Frontend**: http://localhost:3000
 - **API + Scalar Docs**: http://localhost:3001/docs
 - **OpenAPI JSON**: http://localhost:3001/openapi.json
 
 ### 🗺️ What to Test (Seeded Data Map)
 
-| Seeded Form | URL | Feature to Evaluate |
-|---|---|---|
-| Hogwarts Sorting Ceremony | `/forms/sorting-hat` | Drop-off funnel analytics, honeypot protection |
-| Night City Glitch Registry | `/forms/cyber-glitch` | Cyberpunk theme, response limit enforcement |
-| Y-Combinator Application | Dashboard → find in forms list | Startup theme, unlisted visibility |
+| Seeded Form                | URL                            | Feature to Evaluate                            |
+| -------------------------- | ------------------------------ | ---------------------------------------------- |
+| Hogwarts Sorting Ceremony  | `/forms/sorting-hat`           | Drop-off funnel analytics, honeypot protection |
+| Night City Glitch Registry | `/forms/cyber-glitch`          | Cyberpunk theme, response limit enforcement    |
+| Y-Combinator Application   | Dashboard → find in forms list | Startup theme, unlisted visibility             |
 
 ### ✨ Key Features to Verify
+
 1. **Form Filler** → `/forms/sorting-hat` — Framer Motion slide transitions, Enter key nav, conditional logic
 2. **Analytics** → Dashboard → Hogwarts form → Analytics tab — funnel chart + pie charts
 3. **QR Code** → Dashboard → any form → Settings tab → scroll to bottom
@@ -51,7 +55,6 @@ pnpm dev
 FinalForms is a production-style, Typeform-inspired conversational form builder SaaS. It is built as a type-safe Turborepo monorepo utilizing **tRPC**, **Drizzle ORM**, **Zod schema validations**, **Next.js App Router (frontend)**, and **Express (backend REST & Scalar documentation)**.
 
 ---
-
 
 ## 🛠️ Tech Stack & Architecture
 
@@ -70,6 +73,7 @@ FinalForms is a production-style, Typeform-inspired conversational form builder 
 ## 🔑 Authentication System
 
 We implemented a custom, lightweight, type-safe authentication workflow suitable for Windows containers without binary dependency overhead:
+
 - **Hashing**: Uses Node's native `crypto.scryptSync` with a salt prefix, avoiding heavy native binaries like `bcrypt`.
 - **JWT Tokens**: Created using custom JWT sign/verify logic utilizing `crypto.createHmac` for signature checks.
 - **Session Persistence**: Stored on the client using a secure `session_token` cookie. The tRPC context automatically parses this cookie from incoming request headers or query params, establishing `ctx.user` for `protectedProcedure` authorization.
@@ -79,6 +83,7 @@ We implemented a custom, lightweight, type-safe authentication workflow suitable
 ## 📊 Database Schema & Mock Seeding
 
 The database contains 5 core tables under a relational schema:
+
 1. **`users`**: Form creators (name, email, password hash, verification status).
 2. **`forms`**: Form configuration (title, description, status, visibility, theme layout, custom slug, response limits, expiration dates).
 3. **`form_fields`**: Individual form inputs (type, label, placeholder, required flag, ordering, MCQ options array, validation bounds).
@@ -86,7 +91,9 @@ The database contains 5 core tables under a relational schema:
 5. **`response_answers`**: Value inputs corresponding to each field within a response.
 
 ### 🌱 Mock Seeding
+
 We wrote a pure JavaScript database seeder (`packages/database/seed-raw.js`) to guarantee lightweight, memory-efficient seeding on Windows. It seeds:
+
 - **1 Default Administrator**: `admin@finalforms.com` / `password123`.
 - **3 Detailed Themed Forms**:
   - **Hogwarts Sorting Ceremony** (Theme: Hogwarts, status: Published, visibility: Public, custom slug: `sorting-hat`).
@@ -99,6 +106,7 @@ We wrote a pure JavaScript database seeder (`packages/database/seed-raw.js`) to 
 ## 🎨 Layout Themes
 
 Forms render dynamically based on their selected theme:
+
 - **Startup**: Sleek, tech-focused dark navy gradient with modern borders and clean typography.
 - **Hogwarts**: Dark magic theme using deep violet gradients, antique gold/bronze badges, gold glowing elements, and elegant serif styles.
 - **Cyberpunk**: Monospace fonts, pitch-black panels, neon yellow accents, glowing input borders (`#ffee00`), and a terminal aesthetic.
@@ -116,6 +124,7 @@ Forms render dynamically based on their selected theme:
 ## 📈 Form Creator Workspace & Analytics
 
 Visiting `/dashboard/forms/[id]/edit` brings up three tabs:
+
 1. **Build**: Add 8 different field types, adjust required/optional controls, reorder them instantly, and observe live updates on the embedded device simulator.
 2. **Settings**: Modify metadata, switch theme layouts, adjust visibility (Public / Unlisted), configure response count limits, set expiry calendar dates, and set up a custom URL slug.
 3. **Analytics**:
@@ -135,10 +144,12 @@ pnpm dev
 ```
 
 This starts:
+
 - Next.js Frontend on `http://localhost:3000`
 - Express API Server on `http://localhost:3001`
 - Scalar API Docs on `http://localhost:3001/docs`
 
 **Testing Credentials**:
+
 - **Email**: `admin@finalforms.com`
 - **Password**: `password123`

@@ -11,5 +11,6 @@ export function getSessionToken(): string | null {
 }
 
 export function clearSessionToken() {
-  document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure";
+  document.cookie =
+    "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure";
 }

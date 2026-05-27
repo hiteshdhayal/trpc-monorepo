@@ -39,7 +39,7 @@ function sanitizeAnswer(type: string, value: any): any {
 /** Validate a field answer against its validationRules */
 function validateFieldAnswer(
   field: { type: string; label: string; required: boolean; validationRules: any },
-  answer: any
+  answer: any,
 ): void {
   // Fix 6: Server-side email format validation for email fields
   if (field.type === "email" && answer && typeof answer === "string" && answer.trim() !== "") {
@@ -151,12 +151,12 @@ export class FormService {
           and(
             eq(formsTable.status, "published"),
             eq(formsTable.visibility, "public"),
-            eq(formsTable.isArchived, false)
-          )
+            eq(formsTable.isArchived, false),
+          ),
         )
         .orderBy(desc(formsTable.createdAt));
-        
-      return forms.map(form => ({
+
+      return forms.map((form) => ({
         id: form.id,
         title: form.title,
         description: form.description,
@@ -223,7 +223,7 @@ export class FormService {
 
   public async createForm(
     userId: string,
-    data: { title: string; description?: string; theme?: string; visibility?: string }
+    data: { title: string; description?: string; theme?: string; visibility?: string },
   ) {
     const [newForm] = await db
       .insert(formsTable)
@@ -256,7 +256,7 @@ export class FormService {
       customSlug?: string | null;
       expiryDate?: Date | null;
       responseLimit?: number | null;
-    }
+    },
   ) {
     const form = await db.query.formsTable.findFirst({
       where: and(eq(formsTable.id, formId), eq(formsTable.creatorId, userId)),
@@ -458,7 +458,7 @@ export class FormService {
       options?: any;
       validationRules?: any;
       conditionalLogic?: any;
-    }>
+    }>,
   ) {
     const form = await db.query.formsTable.findFirst({
       where: and(eq(formsTable.id, formId), eq(formsTable.creatorId, userId)),
@@ -520,7 +520,7 @@ export class FormService {
       answer: any;
       respondentEmail?: string;
       deviceToken?: string;
-    }
+    },
   ) {
     const form = await db.query.formsTable.findFirst({
       where: eq(formsTable.id, formId),
@@ -528,7 +528,10 @@ export class FormService {
     });
 
     if (!form || form.status !== "published") {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Form is not accepting responses." });
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "Form is not accepting responses.",
+      });
     }
 
     // Enforce limits and expiry
@@ -541,15 +544,16 @@ export class FormService {
         .from(responsesTable)
         .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, true)));
       if (current[0] && current[0].count >= form.responseLimit) {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This form has reached its response limit." });
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "This form has reached its response limit.",
+        });
       }
     }
 
     // Sanitize & validate answer
     const fieldDef = form.fields.find((f) => f.id === data.fieldId);
-    const sanitizedAnswer = fieldDef
-      ? sanitizeAnswer(fieldDef.type, data.answer)
-      : data.answer;
+    const sanitizedAnswer = fieldDef ? sanitizeAnswer(fieldDef.type, data.answer) : data.answer;
     if (fieldDef) {
       validateFieldAnswer(fieldDef, sanitizedAnswer);
     }
@@ -564,7 +568,7 @@ export class FormService {
             where: and(
               eq(responsesTable.formId, formId),
               eq(responsesTable.respondentEmail, data.respondentEmail),
-              eq(responsesTable.completed, true)
+              eq(responsesTable.completed, true),
             ),
           });
           if (duplicate) {
@@ -586,7 +590,10 @@ export class FormService {
           })
           .returning();
         if (!newRes) {
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create response." });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create response.",
+          });
         }
         responseId = newRes.id;
       } else {
@@ -604,7 +611,7 @@ export class FormService {
       const existingAnswer = await tx.query.responseAnswersTable.findFirst({
         where: and(
           eq(responseAnswersTable.responseId, responseId),
-          eq(responseAnswersTable.fieldId, data.fieldId)
+          eq(responseAnswersTable.fieldId, data.fieldId),
         ),
       });
 
@@ -631,7 +638,7 @@ export class FormService {
       responseId: string;
       answers: Array<{ fieldId: string; answer: any }>;
       respondentEmail?: string;
-    }
+    },
   ) {
     const form = await db.query.formsTable.findFirst({
       where: eq(formsTable.id, formId),
@@ -642,7 +649,10 @@ export class FormService {
     } as any);
 
     if (!form || form.status !== "published") {
-      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Form is not accepting responses." });
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "Form is not accepting responses.",
+      });
     }
 
     // Fix 5: Server-side required field enforcement
@@ -650,7 +660,12 @@ export class FormService {
     for (const field of (form as any).fields) {
       if (field.required) {
         const val = answerMap.get(field.id);
-        if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) {
+        if (
+          val === undefined ||
+          val === null ||
+          val === "" ||
+          (Array.isArray(val) && val.length === 0)
+        ) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `Missing required field: "${field.label}"`,
@@ -662,9 +677,7 @@ export class FormService {
     // Sanitize and validate all answers
     const sanitizedAnswers = data.answers.map((item) => {
       const fieldDef = (form as any).fields.find((f: any) => f.id === item.fieldId);
-      const sanitized = fieldDef
-        ? sanitizeAnswer(fieldDef.type, item.answer)
-        : item.answer;
+      const sanitized = fieldDef ? sanitizeAnswer(fieldDef.type, item.answer) : item.answer;
       if (fieldDef && sanitized !== null && sanitized !== undefined && sanitized !== "") {
         validateFieldAnswer(fieldDef, sanitized);
       }
@@ -684,21 +697,20 @@ export class FormService {
 
       // Fix N+1: batch-fetch all existing answers for this response in one query
       const answerFieldIds = sanitizedAnswers.map((a) => a.fieldId);
-      const existingAnswers = answerFieldIds.length > 0
-        ? await tx
-            .select()
-            .from(responseAnswersTable)
-            .where(
-              and(
-                eq(responseAnswersTable.responseId, data.responseId),
-                inArray(responseAnswersTable.fieldId, answerFieldIds)
+      const existingAnswers =
+        answerFieldIds.length > 0
+          ? await tx
+              .select()
+              .from(responseAnswersTable)
+              .where(
+                and(
+                  eq(responseAnswersTable.responseId, data.responseId),
+                  inArray(responseAnswersTable.fieldId, answerFieldIds),
+                ),
               )
-            )
-        : [];
+          : [];
 
-      const existingAnswerMap = new Map(
-        existingAnswers.map((a) => [a.fieldId, a])
-      );
+      const existingAnswerMap = new Map(existingAnswers.map((a) => [a.fieldId, a]));
 
       // Save answers using the pre-fetched map
       for (const item of sanitizedAnswers) {
@@ -734,7 +746,9 @@ export class FormService {
     if (creator?.email) {
       emailService
         .sendNewResponseNotification(creator.email, form.title, data.respondentEmail)
-        .catch((err) => console.error("[FormService] Failed to send creator notification email:", err));
+        .catch((err) =>
+          console.error("[FormService] Failed to send creator notification email:", err),
+        );
     }
 
     return { success: true };
@@ -749,7 +763,7 @@ export class FormService {
       page: number;
       limit: number;
       completedOnly: boolean;
-    }
+    },
   ) {
     const form = await db.query.formsTable.findFirst({
       where: and(eq(formsTable.id, formId), eq(formsTable.creatorId, userId)),
@@ -826,33 +840,31 @@ export class FormService {
     }
 
     // Fix: parallelize the four independent aggregate queries
-    const [totalResponsesRes, completedResponsesRes, partialResponses, timelineRaw] = await Promise.all([
-      db
-        .select({ count: count() })
-        .from(responsesTable)
-        .where(eq(responsesTable.formId, formId)),
-      db
-        .select({ count: count() })
-        .from(responsesTable)
-        .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, true))),
-      db
-        .select({
-          lastAnsweredFieldId: responsesTable.lastAnsweredFieldId,
-          count: count(),
-        })
-        .from(responsesTable)
-        .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, false)))
-        .groupBy(responsesTable.lastAnsweredFieldId),
-      db
-        .select({
-          date: sql<string>`date_trunc('day', ${responsesTable.submittedAt})::date`,
-          count: count(),
-        })
-        .from(responsesTable)
-        .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, true)))
-        .groupBy(sql`date_trunc('day', ${responsesTable.submittedAt})`)
-        .orderBy(sql`date_trunc('day', ${responsesTable.submittedAt})`),
-    ]);
+    const [totalResponsesRes, completedResponsesRes, partialResponses, timelineRaw] =
+      await Promise.all([
+        db.select({ count: count() }).from(responsesTable).where(eq(responsesTable.formId, formId)),
+        db
+          .select({ count: count() })
+          .from(responsesTable)
+          .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, true))),
+        db
+          .select({
+            lastAnsweredFieldId: responsesTable.lastAnsweredFieldId,
+            count: count(),
+          })
+          .from(responsesTable)
+          .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, false)))
+          .groupBy(responsesTable.lastAnsweredFieldId),
+        db
+          .select({
+            date: sql<string>`date_trunc('day', ${responsesTable.submittedAt})::date`,
+            count: count(),
+          })
+          .from(responsesTable)
+          .where(and(eq(responsesTable.formId, formId), eq(responsesTable.completed, true)))
+          .groupBy(sql`date_trunc('day', ${responsesTable.submittedAt})`)
+          .orderBy(sql`date_trunc('day', ${responsesTable.submittedAt})`),
+      ]);
 
     const total = totalResponsesRes[0]?.count ?? 0;
     const completed = completedResponsesRes[0]?.count ?? 0;
@@ -883,7 +895,8 @@ export class FormService {
 
     for (let i = sortedFields.length - 1; i >= 0; i--) {
       const field = sortedFields[i];
-      const dropOffCount = partialResponses.find((pr) => pr.lastAnsweredFieldId === field!.id)?.count ?? 0;
+      const dropOffCount =
+        partialResponses.find((pr) => pr.lastAnsweredFieldId === field!.id)?.count ?? 0;
       accumulativeReaches += dropOffCount;
       dropOffData.unshift({
         fieldId: field!.id,
@@ -891,7 +904,8 @@ export class FormService {
         type: field!.type,
         reached: accumulativeReaches,
         dropped: dropOffCount,
-        dropOffRate: accumulativeReaches > 0 ? Math.round((dropOffCount / accumulativeReaches) * 100) : 0,
+        dropOffRate:
+          accumulativeReaches > 0 ? Math.round((dropOffCount / accumulativeReaches) * 100) : 0,
       });
     }
 
@@ -909,10 +923,7 @@ export class FormService {
         .from(responseAnswersTable)
         .innerJoin(responsesTable, eq(responseAnswersTable.responseId, responsesTable.id))
         .where(
-          and(
-            inArray(responseAnswersTable.fieldId, fieldIds),
-            eq(responsesTable.completed, true)
-          )
+          and(inArray(responseAnswersTable.fieldId, fieldIds), eq(responsesTable.completed, true)),
         );
 
       for (const field of selectFields) {

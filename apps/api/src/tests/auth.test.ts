@@ -18,14 +18,17 @@ describe("Authentication Flow", () => {
     expect(result.session).toBeDefined();
 
     // Verify user is in DB
-    const users = await testDb.select().from(usersTable).where(eq(usersTable.email, "test@example.com"));
+    const users = await testDb
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, "test@example.com"));
     expect(users.length).toBe(1);
     expect(users[0]?.name).toBe("Test User");
   });
 
   it("Register with duplicate email returns a proper error", async () => {
     const caller = createTestCaller();
-    
+
     // First registration
     await caller.auth.register({
       name: "Test User 1",
@@ -52,7 +55,7 @@ describe("Authentication Flow", () => {
 
   it("Login with correct credentials returns session", async () => {
     const caller = createTestCaller();
-    
+
     // Create user first
     await caller.auth.register({
       name: "Login Test",
@@ -72,7 +75,7 @@ describe("Authentication Flow", () => {
 
   it("Login with wrong password returns unauthorized error", async () => {
     const caller = createTestCaller();
-    
+
     // Create user first
     await caller.auth.register({
       name: "Login Fail Test",
@@ -99,7 +102,7 @@ describe("Authentication Flow", () => {
   it("Protected procedure fails without session context", async () => {
     // Unauthenticated caller
     const caller = createTestCaller();
-    
+
     try {
       await caller.form.getForms();
       expect.fail("Should have thrown an error");
@@ -121,12 +124,15 @@ describe("Authentication Flow", () => {
     });
 
     // Get the user ID
-    const users = await testDb.select().from(usersTable).where(eq(usersTable.email, "protected@example.com"));
+    const users = await testDb
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, "protected@example.com"));
     const userId = users[0]!.id;
 
     // Create an authenticated caller
     const authedCaller = createTestCaller({ userId });
-    
+
     // Should succeed and return empty forms list
     const result = await authedCaller.form.getForms();
     expect(Array.isArray(result)).toBe(true);

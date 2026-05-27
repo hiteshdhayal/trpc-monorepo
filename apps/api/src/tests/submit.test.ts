@@ -22,7 +22,10 @@ describe("Form Submission Flow", () => {
       password: "password123",
     });
 
-    const users = await testDb.select().from(usersTable).where(eq(usersTable.email, "submit@example.com"));
+    const users = await testDb
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, "submit@example.com"));
     const userId = users[0]!.id;
 
     authedCaller = createTestCaller({ userId });

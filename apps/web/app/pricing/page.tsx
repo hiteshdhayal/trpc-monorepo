@@ -94,9 +94,14 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-serif font-bold text-[#1A1008]">Upgrade to Pro</h2>
-                  <p className="text-xs text-[#6B5744] mt-0.5">Unlock the full FinalForms experience</p>
+                  <p className="text-xs text-[#6B5744] mt-0.5">
+                    Unlock the full FinalForms experience
+                  </p>
                 </div>
-                <button onClick={onClose} className="text-[#6B5744] hover:text-[#C41E3A] p-1 cursor-pointer">
+                <button
+                  onClick={onClose}
+                  className="text-[#6B5744] hover:text-[#C41E3A] p-1 cursor-pointer"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -127,7 +132,9 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
               {/* Pricing display */}
               <div className="text-center py-2">
                 <div className="flex items-end justify-center gap-1">
-                  <span className="text-4xl font-serif font-extrabold text-[#1A1008]">${price}</span>
+                  <span className="text-4xl font-serif font-extrabold text-[#1A1008]">
+                    ${price}
+                  </span>
                   <span className="text-[#6B5744] text-sm mb-1.5">/month</span>
                 </div>
                 {billing === "annual" && (
@@ -139,7 +146,13 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
 
               {/* Key features */}
               <div className="space-y-2">
-                {["Unlimited forms & responses", "Conditional logic engine", "Email notifications", "QR code sharing", "Priority support"].map((f) => (
+                {[
+                  "Unlimited forms & responses",
+                  "Conditional logic engine",
+                  "Email notifications",
+                  "QR code sharing",
+                  "Priority support",
+                ].map((f) => (
                   <div key={f} className="flex items-center gap-2 text-sm text-[#6B5744]">
                     <Check className="h-4 w-4 text-[#C41E3A] shrink-0" />
                     {f}
@@ -147,10 +160,7 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
 
-              <Button
-                onClick={() => setStep("payment")}
-                className="w-full"
-              >
+              <Button onClick={() => setStep("payment")} className="w-full">
                 Continue to Payment
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -165,7 +175,10 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
         {step === "payment" && (
           <div>
             <div className="p-6 border-b border-[#D4C9B0]/50 flex items-center gap-3">
-              <button onClick={() => setStep("plan")} className="text-[#6B5744] hover:text-[#1A1008] cursor-pointer">
+              <button
+                onClick={() => setStep("plan")}
+                className="text-[#6B5744] hover:text-[#1A1008] cursor-pointer"
+              >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <div>
@@ -178,14 +191,20 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
               <div className="p-3 bg-[rgba(196,30,58,0.04)] border border-[rgba(196,30,58,0.2)] rounded-[3px] flex items-center gap-3">
                 <Zap className="h-5 w-5 text-[#C41E3A] shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-[#1A1008]">Pro Plan — {billing === "annual" ? "Annual" : "Monthly"}</p>
-                  <p className="text-xs text-[#6B5744]">${price}/month billed {billing}</p>
+                  <p className="text-sm font-semibold text-[#1A1008]">
+                    Pro Plan — {billing === "annual" ? "Annual" : "Monthly"}
+                  </p>
+                  <p className="text-xs text-[#6B5744]">
+                    ${price}/month billed {billing}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-[#6B5744] block mb-1.5 font-medium">Card number</label>
+                  <label className="text-xs text-[#6B5744] block mb-1.5 font-medium">
+                    Card number
+                  </label>
                   <div className="h-11 bg-[#FAF7F2] border border-[#D4C9B0] rounded-[3px] px-3 flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-[#A89880]" />
                     <span className="text-[#6B5744] text-sm font-mono">4242 4242 4242 4242</span>
@@ -193,7 +212,9 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-[#6B5744] block mb-1.5 font-medium">Expiry</label>
+                    <label className="text-xs text-[#6B5744] block mb-1.5 font-medium">
+                      Expiry
+                    </label>
                     <div className="h-11 bg-[#FAF7F2] border border-[#D4C9B0] rounded-[3px] px-3 flex items-center">
                       <span className="text-[#6B5744] text-sm font-mono">12/28</span>
                     </div>
@@ -207,11 +228,7 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
 
-              <Button
-                onClick={handleCheckout}
-                disabled={isProcessing}
-                className="w-full"
-              >
+              <Button onClick={handleCheckout} disabled={isProcessing} className="w-full">
                 {isProcessing ? (
                   <>
                     <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -241,9 +258,12 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-serif font-extrabold text-[#1A1008]">Welcome to Pro! 🎉</h2>
+              <h2 className="text-2xl font-serif font-extrabold text-[#1A1008]">
+                Welcome to Pro! 🎉
+              </h2>
               <p className="text-sm text-[#6B5744]">
-                Your account has been upgraded. Conditional logic, email notifications, and QR codes are now unlocked.
+                Your account has been upgraded. Conditional logic, email notifications, and QR codes
+                are now unlocked.
               </p>
             </div>
             <Button
@@ -301,12 +321,11 @@ export default function PricingPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-serif font-extrabold tracking-tight leading-tight">
             Start free.
-            <span className="block text-[#C41E3A] mt-1">
-              Scale with Pro.
-            </span>
+            <span className="block text-[#C41E3A] mt-1">Scale with Pro.</span>
           </h1>
           <p className="text-[#6B5744] text-sm sm:text-base max-w-xl mx-auto">
-            Everything you need to build beautiful conversational forms — no credit card required to start.
+            Everything you need to build beautiful conversational forms — no credit card required to
+            start.
           </p>
 
           {/* Billing toggle */}
@@ -332,7 +351,6 @@ export default function PricingPage() {
         {/* Plans */}
         <section className="max-w-5xl mx-auto px-4 pb-24 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-
             {/* Free Plan */}
             <div className="p-8 rounded-[4px] border border-[#D4C9B0] bg-[#FAF7F2] space-y-6">
               <div className="space-y-1">
@@ -345,17 +363,17 @@ export default function PricingPage() {
               </div>
 
               <Link href="/auth/register">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                >
+                <Button variant="outline" className="w-full">
                   Get Started Free
                 </Button>
               </Link>
 
               <div className="space-y-3 pt-2">
                 {FREE_FEATURES.map((f) => (
-                  <div key={f.label} className={`flex items-center gap-2.5 text-sm ${f.included ? "text-[#6B5744]" : "text-[#A89880] line-through decoration-[#D4C9B0]"}`}>
+                  <div
+                    key={f.label}
+                    className={`flex items-center gap-2.5 text-sm ${f.included ? "text-[#6B5744]" : "text-[#A89880] line-through decoration-[#D4C9B0]"}`}
+                  >
                     {f.included ? (
                       <Check className="h-4 w-4 text-[#C41E3A] shrink-0" />
                     ) : (
@@ -380,18 +398,19 @@ export default function PricingPage() {
                 <h2 className="text-xl font-serif font-bold text-[#1A1008]">Pro</h2>
                 <p className="text-xs text-[#6B5744]">For teams and power users</p>
                 <div className="flex items-end gap-1 mt-3">
-                  <span className="text-4xl font-extrabold text-[#1A1008] font-serif">${proPrice}</span>
+                  <span className="text-4xl font-extrabold text-[#1A1008] font-serif">
+                    ${proPrice}
+                  </span>
                   <span className="text-[#6B5744] text-sm mb-1.5">/month</span>
                 </div>
                 {billing === "annual" && (
-                  <p className="text-xs text-emerald-700 font-semibold mt-1">Billed ${proPrice * 12}/year — saving $36/year</p>
+                  <p className="text-xs text-emerald-700 font-semibold mt-1">
+                    Billed ${proPrice * 12}/year — saving $36/year
+                  </p>
                 )}
               </div>
 
-              <Button
-                onClick={() => setShowCheckout(true)}
-                className="w-full"
-              >
+              <Button onClick={() => setShowCheckout(true)} className="w-full">
                 <Zap className="h-4 w-4" />
                 Upgrade to Pro
               </Button>
@@ -421,13 +440,13 @@ export default function PricingPage() {
                 <div className="flex items-end gap-1 mt-3">
                   <span className="text-4xl font-extrabold text-[#FAF7F2] font-serif">Custom</span>
                 </div>
-                <p className="text-xs text-[#A89880] mt-1">Tailored pricing based on seats & usage</p>
+                <p className="text-xs text-[#A89880] mt-1">
+                  Tailored pricing based on seats & usage
+                </p>
               </div>
 
               <a href="mailto:enterprise@finalforms.com">
-                <Button
-                  className="w-full bg-[#C41E3A] hover:bg-[#8B1A2A] text-white border-none shadow-none font-semibold"
-                >
+                <Button className="w-full bg-[#C41E3A] hover:bg-[#8B1A2A] text-white border-none shadow-none font-semibold">
                   <PhoneCall className="h-4 w-4" />
                   Contact Sales
                 </Button>
@@ -452,22 +471,27 @@ export default function PricingPage() {
           <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                quote: "FinalForms replaced Typeform for our entire startup. The analytics are incredible.",
+                quote:
+                  "FinalForms replaced Typeform for our entire startup. The analytics are incredible.",
                 name: "Arjun Mehta",
-                role: "Founder, Growthly"
+                role: "Founder, Growthly",
               },
               {
-                quote: "The Hogwarts theme got us 3x more responses for our student onboarding form.",
+                quote:
+                  "The Hogwarts theme got us 3x more responses for our student onboarding form.",
                 name: "Priya Sharma",
-                role: "Student Success, IIT Bombay"
+                role: "Student Success, IIT Bombay",
               },
               {
                 quote: "Conditional logic + email notifications is everything. Worth every rupee.",
                 name: "Rahul Verma",
-                role: "Product Lead, Zomato"
-              }
+                role: "Product Lead, Zomato",
+              },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-[4px] border border-[#D4C9B0] bg-[#FAF7F2]/50 space-y-4">
+              <div
+                key={t.name}
+                className="p-6 rounded-[4px] border border-[#D4C9B0] bg-[#FAF7F2]/50 space-y-4"
+              >
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-3.5 w-3.5 text-[#C41E3A] fill-[#C41E3A]" />
@@ -484,26 +508,31 @@ export default function PricingPage() {
 
           {/* FAQ */}
           <div className="mt-20 max-w-2xl mx-auto space-y-4">
-            <h2 className="text-2xl font-serif font-bold text-center mb-8 text-[#1A1008]">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-serif font-bold text-center mb-8 text-[#1A1008]">
+              Frequently Asked Questions
+            </h2>
             {[
               {
                 q: "Can I cancel anytime?",
-                a: "Yes. Cancel your Pro subscription at any time with a single click. No questions, no hoops."
+                a: "Yes. Cancel your Pro subscription at any time with a single click. No questions, no hoops.",
               },
               {
                 q: "What payment methods are supported?",
-                a: "All major credit/debit cards (Visa, Mastercard, Amex) and UPI via Stripe."
+                a: "All major credit/debit cards (Visa, Mastercard, Amex) and UPI via Stripe.",
               },
               {
                 q: "What is conditional logic?",
-                a: "Show or hide questions based on previous answers — e.g., only show \"Which Hogwarts house?\" if the respondent answers \"Yes\" to being a wizard."
+                a: 'Show or hide questions based on previous answers — e.g., only show "Which Hogwarts house?" if the respondent answers "Yes" to being a wizard.',
               },
               {
                 q: "Do responses from the Free plan count against my quota?",
-                a: "Yes, Free is capped at 100 completed responses per month per form. Pro removes all limits."
-              }
+                a: "Yes, Free is capped at 100 completed responses per month per form. Pro removes all limits.",
+              },
             ].map((item) => (
-              <div key={item.q} className="p-5 rounded-[4px] border border-[#D4C9B0] bg-[#FAF7F2] space-y-2">
+              <div
+                key={item.q}
+                className="p-5 rounded-[4px] border border-[#D4C9B0] bg-[#FAF7F2] space-y-2"
+              >
                 <p className="font-serif font-bold text-[#1A1008] text-sm">{item.q}</p>
                 <p className="text-xs text-[#6B5744] leading-relaxed">{item.a}</p>
               </div>

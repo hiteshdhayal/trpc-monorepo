@@ -7,7 +7,14 @@ import { trpc } from "~/trpc/client";
 import { setSessionToken } from "~/lib/auth";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "~/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, KeyRound, Mail, User } from "lucide-react";
@@ -62,7 +69,12 @@ export default function RegisterPage() {
         <CardContent className="p-0 mt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold">Full Name</Label>
+              <Label
+                htmlFor="fullName"
+                className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold"
+              >
+                Full Name
+              </Label>
               <div className="relative">
                 <User className="absolute left-3.5 top-3.5 h-4 w-4 text-[#A89880]" />
                 <Input
@@ -78,7 +90,12 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold">Email Address</Label>
+              <Label
+                htmlFor="email"
+                className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold"
+              >
+                Email Address
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-[#A89880]" />
                 <Input
@@ -94,7 +111,12 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold">Password (min. 6 chars)</Label>
+              <Label
+                htmlFor="password"
+                className="text-[#6B5744] text-xs uppercase tracking-wider font-semibold"
+              >
+                Password (min. 6 chars)
+              </Label>
               <div className="relative">
                 <KeyRound className="absolute left-3.5 top-3.5 h-4 w-4 text-[#A89880]" />
                 <Input
@@ -110,11 +132,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full mt-2"
-              disabled={registerMutation.isPending}
-            >
+            <Button type="submit" className="w-full mt-2" disabled={registerMutation.isPending}>
               {registerMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -129,10 +147,7 @@ export default function RegisterPage() {
         <CardFooter className="flex justify-center text-center mt-6 p-0 border-t border-[#D4C9B0]/50 pt-4">
           <div className="text-xs text-[#6B5744]">
             Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-[#C41E3A] hover:underline font-medium"
-            >
+            <Link href="/auth/login" className="text-[#C41E3A] hover:underline font-medium">
               Log in
             </Link>
           </div>

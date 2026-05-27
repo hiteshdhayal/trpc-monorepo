@@ -22,9 +22,12 @@ export default function FormSuccessPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-serif font-bold text-[#1A1008] tracking-tight">Submission Received!</h1>
+            <h1 className="text-2xl font-serif font-bold text-[#1A1008] tracking-tight">
+              Submission Received!
+            </h1>
             <p className="text-sm text-[#6B5744]">
-              Your response has been securely transmitted and recorded in the database. Thank you for your time.
+              Your response has been securely transmitted and recorded in the database. Thank you
+              for your time.
             </p>
           </div>
 

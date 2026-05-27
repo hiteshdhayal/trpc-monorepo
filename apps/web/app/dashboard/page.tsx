@@ -8,7 +8,14 @@ import { clearSessionToken } from "~/lib/auth";
 import { Button } from "~/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
@@ -42,7 +49,11 @@ export default function DashboardPage() {
   const [showArchived, setShowArchived] = useState(false);
 
   // 1. Auth check
-  const { data: user, error: authError, isLoading: userLoading } = trpc.auth.me.useQuery(undefined, {
+  const {
+    data: user,
+    error: authError,
+    isLoading: userLoading,
+  } = trpc.auth.me.useQuery(undefined, {
     retry: false,
   });
 
@@ -60,9 +71,12 @@ export default function DashboardPage() {
   });
 
   // 2b. Fetch archived forms
-  const { data: archivedForms, isLoading: archivedLoading } = trpc.form.getArchivedForms.useQuery(undefined, {
-    enabled: !!user && showArchived,
-  });
+  const { data: archivedForms, isLoading: archivedLoading } = trpc.form.getArchivedForms.useQuery(
+    undefined,
+    {
+      enabled: !!user && showArchived,
+    },
+  );
 
   // 3. Mutations
   const createFormMutation = trpc.form.createForm.useMutation({
@@ -161,7 +175,10 @@ export default function DashboardPage() {
           {/* Skeleton form cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#FAF7F2] border border-[#D4C9B0] rounded-xl p-5 space-y-4">
+              <div
+                key={i}
+                className="bg-[#FAF7F2] border border-[#D4C9B0] rounded-xl p-5 space-y-4"
+              >
                 <div className="flex items-center justify-between">
                   <div className="h-5 w-2/3 bg-[#EDE8DC] rounded animate-pulse" />
                   <div className="h-5 w-16 bg-[#EDE8DC] rounded-full animate-pulse" />
@@ -181,14 +198,16 @@ export default function DashboardPage() {
     );
   }
 
-  const activeForms = forms?.filter((form) =>
-    form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  const activeForms = forms?.filter(
+    (form) =>
+      form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
-  const filteredArchived = archivedForms?.filter((form) =>
-    form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredArchived = archivedForms?.filter(
+    (form) =>
+      form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const displayForms = showArchived ? filteredArchived : activeForms;
@@ -203,14 +222,15 @@ export default function DashboardPage() {
             <div className="h-9 w-9 rounded-xl bg-[#C41E3A] flex items-center justify-center font-bold text-white shadow-none">
               F
             </div>
-            <span className="text-xl font-serif font-bold text-[#1A1008]">
-              FinalForms
-            </span>
+            <span className="text-xl font-serif font-bold text-[#1A1008]">FinalForms</span>
           </div>
 
           <div className="flex items-center gap-4">
             <Link href="/explore">
-              <Button variant="ghost" className="text-[#6B5744] hover:text-[#1A1008] flex items-center gap-2 cursor-pointer">
+              <Button
+                variant="ghost"
+                className="text-[#6B5744] hover:text-[#1A1008] flex items-center gap-2 cursor-pointer"
+              >
                 <Compass className="h-4 w-4 text-[#C41E3A]" />
                 Explore
               </Button>
@@ -219,7 +239,10 @@ export default function DashboardPage() {
             {/* Admin Panel link — only for admin users */}
             {user.isAdmin && (
               <Link href="/admin">
-                <Button variant="ghost" className="text-[#C41E3A] hover:text-[#8B1A2A] flex items-center gap-2 cursor-pointer">
+                <Button
+                  variant="ghost"
+                  className="text-[#C41E3A] hover:text-[#8B1A2A] flex items-center gap-2 cursor-pointer"
+                >
                   <ShieldAlert className="h-4 w-4" />
                   Admin
                 </Button>
@@ -279,7 +302,11 @@ export default function DashboardPage() {
               onClick={() => setShowArchived(!showArchived)}
               title={showArchived ? "View active forms" : "View archived forms"}
             >
-              {showArchived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+              {showArchived ? (
+                <ArchiveRestore className="h-4 w-4" />
+              ) : (
+                <Archive className="h-4 w-4" />
+              )}
               <span className="hidden sm:inline">{showArchived ? "Active Forms" : "Archived"}</span>
             </Button>
 
@@ -299,7 +326,10 @@ export default function DashboardPage() {
         {isLoadingForms ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
-              <Card key={n} className="border-[#D4C9B0] bg-[#FAF7F2]/60 h-48 animate-pulse shadow-none" />
+              <Card
+                key={n}
+                className="border-[#D4C9B0] bg-[#FAF7F2]/60 h-48 animate-pulse shadow-none"
+              />
             ))}
           </div>
         ) : displayForms && displayForms.length > 0 ? (
@@ -309,8 +339,8 @@ export default function DashboardPage() {
                 form.theme === "hogwarts"
                   ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
                   : form.theme === "cyberpunk"
-                  ? "bg-yellow-600/10 text-yellow-700 border-yellow-600/20"
-                  : "bg-indigo-500/10 text-indigo-600 border-indigo-500/20";
+                    ? "bg-yellow-600/10 text-yellow-700 border-yellow-600/20"
+                    : "bg-indigo-500/10 text-indigo-600 border-indigo-500/20";
 
               return (
                 <Card
@@ -320,11 +350,17 @@ export default function DashboardPage() {
                   <CardHeader className="p-5 pb-3">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className={`${themeBadgeColor} uppercase text-[10px] tracking-wider px-2 py-0.5 shadow-none`}>
+                        <Badge
+                          variant="outline"
+                          className={`${themeBadgeColor} uppercase text-[10px] tracking-wider px-2 py-0.5 shadow-none`}
+                        >
                           {form.theme}
                         </Badge>
                         {(form as any).isPasswordProtected && (
-                          <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[9px] px-1.5 uppercase tracking-wider flex items-center gap-0.5">
+                          <Badge
+                            variant="outline"
+                            className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[9px] px-1.5 uppercase tracking-wider flex items-center gap-0.5"
+                          >
                             <Lock className="h-2.5 w-2.5" />
                             PW
                           </Badge>
@@ -332,12 +368,18 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         {form.visibility === "public" ? (
-                          <span className="text-[#6B5744] text-xs flex items-center gap-1" title="Publicly searchable">
+                          <span
+                            className="text-[#6B5744] text-xs flex items-center gap-1"
+                            title="Publicly searchable"
+                          >
                             <Globe className="h-3 w-3 text-[#C41E3A]" />
                             Public
                           </span>
                         ) : (
-                          <span className="text-[#6B5744] text-xs flex items-center gap-1" title="Only viewable via link">
+                          <span
+                            className="text-[#6B5744] text-xs flex items-center gap-1"
+                            title="Only viewable via link"
+                          >
                             <Lock className="h-3 w-3" />
                             Unlisted
                           </span>
@@ -348,8 +390,8 @@ export default function DashboardPage() {
                             form.status === "published"
                               ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : form.isArchived
-                              ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                              : "bg-neutral-500/10 text-[#6B5744] border-neutral-500/20"
+                                ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                : "bg-neutral-500/10 text-[#6B5744] border-neutral-500/20"
                           }`}
                         >
                           {form.isArchived ? "archived" : form.status}
@@ -388,7 +430,11 @@ export default function DashboardPage() {
                           variant="ghost"
                           className="h-8 w-8 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer ml-auto"
                           onClick={() => {
-                            if (confirm("Permanently delete this archived form? All responses will be lost.")) {
+                            if (
+                              confirm(
+                                "Permanently delete this archived form? All responses will be lost.",
+                              )
+                            ) {
                               deleteFormMutation.mutate({ id: form.id });
                             }
                           }}
@@ -403,7 +449,11 @@ export default function DashboardPage() {
                       <>
                         <div className="flex items-center gap-2">
                           <Link href={`/dashboard/forms/${form.id}/edit`}>
-                            <Button size="sm" variant="ghost" className="h-8 text-[#6B5744] hover:text-[#1A1008] cursor-pointer flex items-center gap-1.5 p-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 text-[#6B5744] hover:text-[#1A1008] cursor-pointer flex items-center gap-1.5 p-1"
+                            >
                               <Edit className="h-3.5 w-3.5" />
                               Edit
                             </Button>
@@ -420,7 +470,12 @@ export default function DashboardPage() {
                           </Button>
 
                           <Link href={`/forms/${form.id}`} target="_blank">
-                            <Button size="sm" variant="ghost" className="h-8 text-[#6B5744] hover:text-[#1A1008] cursor-pointer p-1" title="Open live form">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 text-[#6B5744] hover:text-[#1A1008] cursor-pointer p-1"
+                              title="Open live form"
+                            >
                               <ExternalLink className="h-3.5 w-3.5" />
                             </Button>
                           </Link>
@@ -452,7 +507,11 @@ export default function DashboardPage() {
                             variant="ghost"
                             className="h-8 w-8 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer"
                             onClick={() => {
-                              if (confirm("Are you sure you want to delete this form? All responses will be permanently removed.")) {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this form? All responses will be permanently removed.",
+                                )
+                              ) {
                                 deleteFormMutation.mutate({ id: form.id });
                               }
                             }}
@@ -499,7 +558,9 @@ export default function DashboardPage() {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="bg-[#FAF7F2] border-[#D4C9B0] text-[#1A1008] max-w-md shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-serif font-bold text-[#1A1008]">Create New Form</DialogTitle>
+            <DialogTitle className="text-xl font-serif font-bold text-[#1A1008]">
+              Create New Form
+            </DialogTitle>
             <DialogDescription className="text-[#6B5744]">
               Initialize a premium Typeform-style conversational form.
             </DialogDescription>
@@ -507,7 +568,9 @@ export default function DashboardPage() {
 
           <form onSubmit={handleCreateForm} className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="formTitle" className="text-[#6B5744]">Form Title</Label>
+              <Label htmlFor="formTitle" className="text-[#6B5744]">
+                Form Title
+              </Label>
               <Input
                 id="formTitle"
                 placeholder="e.g., Summer Event Feedback"
@@ -519,7 +582,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="formTheme" className="text-[#6B5744]">Premium Theme Layout</Label>
+              <Label htmlFor="formTheme" className="text-[#6B5744]">
+                Premium Theme Layout
+              </Label>
               <select
                 id="formTheme"
                 className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2 focus:border-[#C41E3A] outline-none"
@@ -533,7 +598,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="formVisibility" className="text-[#6B5744]">Visibility</Label>
+              <Label htmlFor="formVisibility" className="text-[#6B5744]">
+                Visibility
+              </Label>
               <select
                 id="formVisibility"
                 className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2 focus:border-[#C41E3A] outline-none"

@@ -52,9 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-extrabold tracking-tight">
-                Something went wrong
-              </h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">Something went wrong</h1>
               <p className="text-sm text-neutral-400 leading-relaxed">
                 An unexpected error occurred. Our team has been notified.
               </p>

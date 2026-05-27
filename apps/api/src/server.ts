@@ -117,13 +117,16 @@ app.get("/api/forms/:formId/csv", async (req: any, res: any) => {
     // Check token from cookies or authorization header
     const cookieHeader = req.headers.cookie;
     if (cookieHeader) {
-      const cookies = cookieHeader.split(";").reduce((acc: any, cookie: any) => {
-        const [key, val] = cookie.trim().split("=");
-        if (key && val) {
-          acc[key] = decodeURIComponent(val);
-        }
-        return acc;
-      }, {} as Record<string, string>);
+      const cookies = cookieHeader.split(";").reduce(
+        (acc: any, cookie: any) => {
+          const [key, val] = cookie.trim().split("=");
+          if (key && val) {
+            acc[key] = decodeURIComponent(val);
+          }
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
 
       if (cookies.session_token) {
         const decoded = verifyJwt(cookies.session_token);
@@ -166,7 +169,7 @@ app.get("/api/forms/:formId/csv", async (req: any, res: any) => {
     res.setHeader("Content-Type", "text/csv");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="responses-${form.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.csv"`
+      `attachment; filename="responses-${form.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.csv"`,
     );
 
     // Escape CSV helper
@@ -236,7 +239,6 @@ app.get("/api/forms/:formId/csv", async (req: any, res: any) => {
     }
   }
 });
-
 
 app.use(
   "/api",

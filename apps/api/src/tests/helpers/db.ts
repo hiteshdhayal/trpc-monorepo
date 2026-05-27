@@ -4,7 +4,9 @@ import * as schema from "@repo/database/schema";
 import { beforeEach } from "vitest";
 
 if (process.env.NODE_ENV !== "test") {
-  throw new Error("Tests must be run with NODE_ENV=test. This prevents accidental truncation of development or production databases.");
+  throw new Error(
+    "Tests must be run with NODE_ENV=test. This prevents accidental truncation of development or production databases.",
+  );
 }
 
 if (!process.env.TEST_DATABASE_URL) {

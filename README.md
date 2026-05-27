@@ -9,12 +9,14 @@ A production-grade, Typeform-inspired conversational form builder SaaS built wit
 ## 👨‍⚖️ Quick Start for Judges
 
 ### 🔑 Demo Credentials
+
 | Field    | Value                  |
-|----------|------------------------|
-| Email    | `admin@finalforms.com`  |
+| -------- | ---------------------- |
+| Email    | `admin@finalforms.com` |
 | Password | `password123`          |
 
 ### 🚀 Start the App
+
 ```bash
 # 1. Install dependencies
 pnpm install
@@ -28,17 +30,18 @@ pnpm dev
 ```
 
 ### 🔗 URLs
+
 - **Frontend**: http://localhost:3000
 - **API Docs (Scalar)**: http://localhost:8000/docs
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
 
 ### 🗺️ Seeded Data Map
 
-| Seeded Form                | URL                    | Feature to Evaluate                              |
-|----------------------------|------------------------|--------------------------------------------------|
-| Hogwarts Sorting Ceremony  | `/forms/sorting-hat`   | Drop-off funnel analytics, honeypot protection   |
-| Night City Glitch Registry | `/forms/cyber-glitch`  | Cyberpunk theme, response limit enforcement      |
-| Y-Combinator Application   | Dashboard → forms list | Startup theme, unlisted visibility               |
+| Seeded Form                | URL                    | Feature to Evaluate                            |
+| -------------------------- | ---------------------- | ---------------------------------------------- |
+| Hogwarts Sorting Ceremony  | `/forms/sorting-hat`   | Drop-off funnel analytics, honeypot protection |
+| Night City Glitch Registry | `/forms/cyber-glitch`  | Cyberpunk theme, response limit enforcement    |
+| Y-Combinator Application   | Dashboard → forms list | Startup theme, unlisted visibility             |
 
 ---
 
@@ -59,6 +62,7 @@ pnpm dev
 ## ✨ Key Features
 
 ### Form Builder
+
 - 6 field types: short text, long text, email, number, single select, multi select
 - Conditional logic (show/hide fields based on answers)
 - Three visual themes: Startup, Hogwarts, Cyberpunk
@@ -66,6 +70,7 @@ pnpm dev
 - Custom URL slugs, expiry dates, response limits
 
 ### Form Filler (Public)
+
 - Conversational stepper UI with Framer Motion transitions
 - Enter key navigation, keyboard-first UX
 - Honeypot bot protection + IP rate limiting
@@ -73,6 +78,7 @@ pnpm dev
 - Partial progress saved to database per-question
 
 ### Analytics Dashboard
+
 - Completion rate metrics
 - Per-field drop-off funnel chart
 - Choice distribution pie charts (computed server-side)
@@ -80,6 +86,7 @@ pnpm dev
 - Streaming CSV export with proper escaping
 
 ### Security
+
 - Helmet + strict CORS (exact frontend URL, not `*`)
 - Zod environment validation at startup
 - JWT authentication with `crypto.scryptSync` password hashing
@@ -91,6 +98,7 @@ pnpm dev
 ## 📊 Database Schema
 
 5 core tables with Drizzle relations:
+
 1. **`users`** — creators (name, email, password hash)
 2. **`forms`** — config (title, status, visibility, theme, slug, limits, expiry)
 3. **`form_fields`** — inputs (type, label, required, options, validation rules)
@@ -110,6 +118,7 @@ pnpm turbo lint typecheck
 ```
 
 Tests cover:
+
 - Auth flows (register, duplicate email, login, wrong password, protected routes)
 - Form submission (valid submit, unpublished rejection, missing required fields, fake fieldId, invalid select option)
 
@@ -118,6 +127,7 @@ Tests cover:
 ## 🔄 CI Pipeline
 
 GitHub Actions runs on every push to `main`/`dev` and PRs to `main`:
+
 - `pnpm turbo lint`
 - `pnpm turbo typecheck`
 - `pnpm turbo test`

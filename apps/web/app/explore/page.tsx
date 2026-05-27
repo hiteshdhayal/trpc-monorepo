@@ -9,7 +9,16 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "~/com
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { toast } from "sonner";
-import { Compass, Search, Sparkles, ArrowLeft, ArrowRight, Copy, Lock, Loader2 } from "lucide-react";
+import {
+  Compass,
+  Search,
+  Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  Copy,
+  Lock,
+  Loader2,
+} from "lucide-react";
 
 export default function ExplorePage() {
   const router = useRouter();
@@ -28,21 +37,20 @@ export default function ExplorePage() {
       utils.form.getForms.invalidate();
       toast.success("Template imported! Opening editor...");
       router.push(`/dashboard/forms/${cloned.id}/edit`);
-
     },
     onError: (err) => {
       toast.error(err.message || "Failed to import template.");
     },
   });
 
-  const filteredForms = publicForms?.filter((form) =>
-    form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredForms = publicForms?.filter(
+    (form) =>
+      form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   return (
     <div className="min-h-screen bg-[#F5F0E8] text-[#1A1008] selection:bg-[rgba(196,30,58,0.15)] selection:text-[#1A1008]">
-
       {/* Navigation Header */}
       <header className="border-b border-[#D4C9B0] bg-[#FAF7F2]/90 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -78,7 +86,8 @@ export default function ExplorePage() {
             </h1>
           </div>
           <p className="text-[#6B5744] text-sm leading-relaxed">
-            Discover community-designed forms. Click <strong>"Use as Template"</strong> to instantly import any form into your dashboard as a draft.
+            Discover community-designed forms. Click <strong>"Use as Template"</strong> to instantly
+            import any form into your dashboard as a draft.
           </p>
 
           {/* Search bar */}
@@ -121,7 +130,8 @@ export default function ExplorePage() {
                     ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                     : "bg-[#C41E3A]/5 text-[#C41E3A] border-[#C41E3A]/20";
 
-              const isCloning = cloneFormMutation.isPending && cloneFormMutation.variables?.id === form.id;
+              const isCloning =
+                cloneFormMutation.isPending && cloneFormMutation.variables?.id === form.id;
 
               return (
                 <Card
@@ -131,19 +141,23 @@ export default function ExplorePage() {
                   <CardHeader className="p-5">
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className={`${themeBadgeColor} uppercase text-[9px] tracking-wider px-2`}>
+                        <Badge
+                          variant="outline"
+                          className={`${themeBadgeColor} uppercase text-[9px] tracking-wider px-2`}
+                        >
                           {form.theme}
                         </Badge>
                         {form.isPasswordProtected && (
-                          <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[9px] px-1.5 uppercase tracking-wider flex items-center gap-1">
+                          <Badge
+                            variant="outline"
+                            className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[9px] px-1.5 uppercase tracking-wider flex items-center gap-1"
+                          >
                             <Lock className="h-2.5 w-2.5" />
                             Protected
                           </Badge>
                         )}
                       </div>
-                      <span className="text-[10px] text-[#6B5744]">
-                        By {form.creatorName}
-                      </span>
+                      <span className="text-[10px] text-[#6B5744]">By {form.creatorName}</span>
                     </div>
 
                     <CardTitle className="text-base font-serif font-bold text-[#1A1008] group-hover:text-[#C41E3A] transition-colors line-clamp-1">
@@ -164,9 +178,15 @@ export default function ExplorePage() {
                         disabled={isCloning}
                       >
                         {isCloning ? (
-                          <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />Importing...</>
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                            Importing...
+                          </>
                         ) : (
-                          <><Copy className="h-3.5 w-3.5 mr-1" />Use as Template</>
+                          <>
+                            <Copy className="h-3.5 w-3.5 mr-1" />
+                            Use as Template
+                          </>
                         )}
                       </Button>
                     )}
