@@ -152,6 +152,14 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
+          <div className="text-xs text-[#6B5744]">
+            <Link
+              href="/auth/forgot-password"
+              className="text-[#C41E3A] hover:underline font-medium"
+            >
+              Forgot your password?
+            </Link>
+          </div>
           <div className="text-[10px] text-[#A89880] w-full">
             Demo credentials: <span className="font-mono text-[#6B5744]">admin@finalforms.com</span>{" "}
             / <span className="font-mono text-[#6B5744]">password123</span>

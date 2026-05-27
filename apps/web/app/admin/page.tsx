@@ -23,6 +23,7 @@ import {
   BarChart2,
   CheckCircle2,
 } from "lucide-react";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -50,6 +51,8 @@ export default function AdminPage() {
 
   const [usersPage, setUsersPage] = useState(1);
   const [formsPage, setFormsPage] = useState(1);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [formToDelete, setFormToDelete] = useState<{ id: string; title: string; creatorName: string } | null>(null);
 
   // Stats
   const { data: stats, isLoading: statsLoading } = trpc.admin.getSystemStats.useQuery(undefined, {
@@ -299,15 +302,7 @@ export default function AdminPage() {
                               className="h-7 w-7 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer"
                               disabled={u.id === user.id || deleteUserMutation.isPending}
                               title={u.id === user.id ? "Cannot delete yourself" : "Delete user"}
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Delete user "${u.fullName}" (${u.email})? This will also delete all their forms and responses.`,
-                                  )
-                                ) {
-                                  deleteUserMutation.mutate({ userId: u.id });
-                                }
-                              }}
+                              onClick={() => setUserToDelete({ id: u.id, name: u.fullName, email: u.email })}
                             >
                               {deleteUserMutation.isPending &&
                               deleteUserMutation.variables?.userId === u.id ? (
@@ -461,15 +456,7 @@ export default function AdminPage() {
                               className="h-7 w-7 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer"
                               disabled={deleteFormMutation.isPending}
                               title="Delete form"
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Delete form "${form.title}" by ${form.creatorName}? This is permanent.`,
-                                  )
-                                ) {
-                                  deleteFormMutation.mutate({ formId: form.id });
-                                }
-                              }}
+                              onClick={() => setFormToDelete({ id: form.id, title: form.title, creatorName: form.creatorName })}
                             >
                               {deleteFormMutation.isPending &&
                               deleteFormMutation.variables?.formId === form.id ? (
@@ -526,6 +513,32 @@ export default function AdminPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <ConfirmDialog
+        open={!!userToDelete}
+        onOpenChange={(open) => !open && setUserToDelete(null)}
+        title="Delete User"
+        description={`Delete user "${userToDelete?.name}" (${userToDelete?.email})? This will also delete all their forms and responses.`}
+        confirmText="Delete User"
+        onConfirm={() => {
+          if (userToDelete) {
+            deleteUserMutation.mutate({ userId: userToDelete.id });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!formToDelete}
+        onOpenChange={(open) => !open && setFormToDelete(null)}
+        title="Delete Form"
+        description={`Delete form "${formToDelete?.title}" by ${formToDelete?.creatorName}? This is permanent.`}
+        confirmText="Delete Form"
+        onConfirm={() => {
+          if (formToDelete) {
+            deleteFormMutation.mutate({ formId: formToDelete.id });
+          }
+        }}
+      />
     </div>
   );
 }

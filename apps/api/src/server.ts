@@ -15,6 +15,12 @@ import { userService } from "@repo/services/user/index";
 
 // Import and validate env at startup
 import { env } from "./env";
+import { csrfMiddleware } from "./middleware/csrf";
+import {
+  forgotPasswordRateLimiter,
+  resetPasswordRateLimiter,
+  authRateLimiter,
+} from "./middleware/rate-limit";
 
 export async function createApp() {
   const app = express();
@@ -22,16 +28,27 @@ export async function createApp() {
   // Fix: enable trust proxy so req.ip is correctly populated from x-forwarded-for
   app.set("trust proxy", true);
 
-  // Security middleware
-  app.use(helmet());
+  // ── Security: Helmet with strict headers ─────────────────────────────────────
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"], // needed for Scalar docs UI
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          frameSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // needed for Scalar docs
+    }),
+  );
 
-  const openApiDocument = generateOpenApiDocument(serverRouter, {
-    title: "FinalForms OpenAPI",
-    version: "1.0.0",
-    baseUrl: env.BASE_URL.concat("/api"),
-  });
-
-  // Strict CORS to the frontend URL only
+  // ── Security: Strict CORS ─────────────────────────────────────────────────────
   app.use(
     cors({
       origin: env.FRONTEND_URL,
@@ -39,7 +56,18 @@ export async function createApp() {
     }),
   );
 
-  app.use(express.json());
+  // ── Security: Body size limit (prevents large-payload DoS) ───────────────────
+  app.use(express.json({ limit: "10kb" }));
+  app.use(express.urlencoded({ extended: false, limit: "10kb" }));
+
+  // ── Security: CSRF protection (double-submit cookie) ─────────────────────────
+  app.use(csrfMiddleware);
+
+  const openApiDocument = generateOpenApiDocument(serverRouter, {
+    title: "FinalForms OpenAPI",
+    version: "1.0.0",
+    baseUrl: env.BASE_URL.concat("/api"),
+  });
 
   app.get("/", (req, res) => {
     return res.json({ message: "Streamyst is up and running..." });
@@ -99,7 +127,7 @@ export async function createApp() {
           },
         });
         if (response.ok) {
-          const profile = (await response.json()) as any;
+          const profile = (await response.json()) as { id: string; email: string; name?: string; picture?: string };
           googleId = profile.id;
           email = profile.email;
           name = profile.name || "";
@@ -330,6 +358,24 @@ export async function createApp() {
     }
   });
 
+  // ── Rate Limiting on Auth endpoints ──────────────────────────────────────────
+  // Applied to both tRPC (/trpc) and OpenAPI (/api) paths
+  // forgotPassword: 5/hr/IP — prevents user enumeration via timing attacks
+  app.post(
+    ["/trpc/auth.forgotPassword", "/api/authentication/forgot-password"],
+    forgotPasswordRateLimiter,
+  );
+  // resetPassword: 10/hr/IP — prevents token brute-force
+  app.post(
+    ["/trpc/auth.resetPassword", "/api/authentication/reset-password"],
+    resetPasswordRateLimiter,
+  );
+  // General auth rate limit: login + register — prevents credential stuffing
+  app.post(
+    ["/trpc/auth.login", "/api/authentication/login", "/trpc/auth.register", "/api/authentication/register"],
+    authRateLimiter,
+  );
+
   app.use(
     "/api",
     createOpenApiExpressMiddleware({
@@ -362,4 +408,3 @@ export async function createApp() {
 
   return app;
 }
-

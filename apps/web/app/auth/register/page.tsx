@@ -18,19 +18,19 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, KeyRound, Mail, User } from "lucide-react";
+import { Loader2, KeyRound, Mail, User, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: (data) => {
-      setSessionToken(data.token);
-      toast.success(`Welcome to FinalForms, ${data.user.fullName}!`);
-      router.push("/dashboard");
+      // Do not log in or redirect immediately. Let them verify their email.
+      setSubmitted(true);
     },
     onError: (err) => {
       toast.error(err.message || "Registration failed. Please try again.");
@@ -49,6 +49,34 @@ export default function RegisterPage() {
     }
     registerMutation.mutate({ fullName, email, password });
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F0E8] px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-radial-[circle_at_center,#D4C9B0_1px,transparent_1px] bg-[size:24px_24px] opacity-20 pointer-events-none" />
+        <Card className="w-full max-w-[400px] border-[#D4C9B0] bg-[#FAF7F2] rounded-[6px] p-10 shadow-[0_16px_64px_rgba(26,16,8,0.08)] relative z-10 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[rgba(34,197,94,0.1)] border border-green-200 flex items-center justify-center">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+          <h2 className="text-xl font-bold font-serif text-[#1A1008] mb-3">Check your inbox</h2>
+          <p className="text-sm text-[#6B5744] mb-6 leading-relaxed">
+            We've sent a verification link to <strong className="text-[#1A1008]">{email}</strong>. 
+            Please check your email to activate your account.
+          </p>
+          <p className="text-xs text-[#A89880] mb-6">
+            Didn't receive it? Check your spam folder.
+          </p>
+          <Link href="/auth/login">
+            <Button variant="outline" className="w-full border-[#D4C9B0]">
+              Back to Login
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5F0E8] px-4 relative overflow-hidden">

@@ -18,6 +18,14 @@ export const usersTable = pgTable("users", {
   googleId: varchar("google_id", { length: 255 }),
   provider: varchar("provider", { length: 50 }),
 
+  // Password reset — token stored as SHA-256 hash, NEVER raw
+  resetPasswordToken: varchar("reset_password_token", { length: 64 }),
+  resetPasswordExpires: timestamp("reset_password_expires"),
+
+  // Email verification — token stored as SHA-256 hash, NEVER raw
+  verifyEmailToken: varchar("verify_email_token", { length: 64 }),
+  verifyEmailExpires: timestamp("verify_email_expires"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

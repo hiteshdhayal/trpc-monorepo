@@ -7,6 +7,7 @@ import {
   usersTable,
 } from "@repo/database/schema";
 import { TRPCError } from "@trpc/server";
+import { logger } from "@repo/logger";
 import { emailService } from "../email/index";
 import { hashPassword, verifyPassword } from "../user/auth";
 
@@ -166,7 +167,7 @@ export class FormService {
         isPasswordProtected: form.passwordHash !== null,
       }));
     } catch (error: any) {
-      console.error("[FormService] getPublicExploreForms error:", error);
+      logger.error("[FormService] getPublicExploreForms error", { error });
       // Return empty array instead of 500 error if DB is down or query fails
       return [];
     }
@@ -190,14 +191,14 @@ export class FormService {
     const verified = this.verifyFormAccess(form, userId);
 
     // Never expose the passwordHash to clients — convert to isPasswordProtected flag
-    const { passwordHash, ...safeForm } = verified as any;
+    const { passwordHash, ...safeForm } = verified as typeof form;
     return {
       ...safeForm,
       isPasswordProtected: passwordHash !== null && passwordHash !== undefined,
     };
   }
 
-  private verifyFormAccess(form: any, userId?: string) {
+  private verifyFormAccess<T extends { creatorId: string; status: string; isArchived: boolean }>(form: T, userId?: string): T {
     // If owner, let them access
     if (userId && form.creatorId === userId) {
       return form;
@@ -646,7 +647,7 @@ export class FormService {
         fields: true,
         creator: true,
       },
-    } as any);
+    });
 
     if (!form || form.status !== "published") {
       throw new TRPCError({
@@ -657,7 +658,7 @@ export class FormService {
 
     // Fix 5: Server-side required field enforcement
     const answerMap = new Map(data.answers.map((a) => [a.fieldId, a.answer]));
-    for (const field of (form as any).fields) {
+    for (const field of form.fields) {
       if (field.required) {
         const val = answerMap.get(field.id);
         if (
@@ -676,7 +677,7 @@ export class FormService {
 
     // Sanitize and validate all answers
     const sanitizedAnswers = data.answers.map((item) => {
-      const fieldDef = (form as any).fields.find((f: any) => f.id === item.fieldId);
+      const fieldDef = form.fields.find((f) => f.id === item.fieldId);
       const sanitized = fieldDef ? sanitizeAnswer(fieldDef.type, item.answer) : item.answer;
       if (fieldDef && sanitized !== null && sanitized !== undefined && sanitized !== "") {
         validateFieldAnswer(fieldDef, sanitized);
@@ -733,21 +734,21 @@ export class FormService {
     // Send thank-you email to respondent (non-blocking)
     if (data.respondentEmail) {
       const answerLabels = sanitizedAnswers.map((a) => {
-        const field = (form as any).fields.find((f: any) => f.id === a.fieldId);
+        const field = form.fields.find((f) => f.id === a.fieldId);
         return { label: field?.label ?? a.fieldId, answer: a.answer };
       });
       emailService
         .sendThankYou(data.respondentEmail, form.title, answerLabels)
-        .catch((err) => console.error("[FormService] Failed to send thank-you email:", err));
+        .catch((err) => logger.error("[FormService] Failed to send thank-you email", { err }));
     }
 
     // [Feature 1] Send creator notification email (non-blocking)
-    const creator = (form as any).creator;
+    const creator = form.creator;
     if (creator?.email) {
       emailService
         .sendNewResponseNotification(creator.email, form.title, data.respondentEmail)
         .catch((err) =>
-          console.error("[FormService] Failed to send creator notification email:", err),
+          logger.error("[FormService] Failed to send creator notification email", { err }),
         );
     }
 

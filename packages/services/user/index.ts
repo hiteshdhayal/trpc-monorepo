@@ -2,8 +2,10 @@ import { db, eq } from "@repo/database";
 import { usersTable } from "@repo/database/schema";
 import { env } from "../env";
 import { googleOAuth2Client } from "../clients/google-oauth";
-import { GetAuthenticationMethodOutputSchema } from "./model";
+import { GetAuthenticationMethodOutputSchema } from "@repo/shared";
 import { hashPassword, verifyPassword, signJwt } from "./auth";
+import { generateVerificationToken } from "./email-verification";
+import { emailService } from "../email";
 import { TRPCError } from "@trpc/server";
 
 class UserService {
@@ -48,7 +50,7 @@ class UserService {
         fullName,
         email: normalizedEmail,
         passwordHash: hashed,
-        emailVerified: true,
+        emailVerified: false,
       })
       .returning();
 
@@ -56,10 +58,22 @@ class UserService {
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user." });
     }
 
-    const token = signJwt({ userId: user.id });
+    const { rawToken, hashedToken } = generateVerificationToken();
+    const verifyEmailExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await db
+      .update(usersTable)
+      .set({
+        verifyEmailToken: hashedToken,
+        verifyEmailExpires,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    const verifyUrl = `${env.FRONTEND_URL}/auth/verify-email?token=${rawToken}`;
+    await emailService.sendVerificationEmail(user.email, verifyUrl);
 
     return {
-      token,
+      token: "", // Do not log in immediately
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -79,6 +93,13 @@ class UserService {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Invalid email or password.",
+      });
+    }
+
+    if (!user.emailVerified) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Please verify your email address before logging in.",
       });
     }
 

@@ -18,10 +18,11 @@ const serializeErrors = winston.format((info) => {
         stack: value.stack,
       };
     } else if (value && typeof value === "object" && "stack" in value && "message" in value) {
+      const errLike = value as { message: unknown; stack: unknown };
       info[key] = {
         ...value,
-        message: (value as any).message,
-        stack: (value as any).stack,
+        message: errLike.message,
+        stack: errLike.stack,
       };
     }
   }

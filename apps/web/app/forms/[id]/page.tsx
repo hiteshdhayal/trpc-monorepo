@@ -343,7 +343,7 @@ export default function PublicFormFillerPage() {
   if (error || !form) {
     // Fix 4: Parse tRPC error to show specific error screens
     const errorMessage = error?.message || "";
-    const errorCode = (error?.data as any)?.code || "";
+    const errorCode = (error?.data as { code?: string })?.code || "";
 
     // Case: Form expired
     if (errorMessage.toLowerCase().includes("expired")) {

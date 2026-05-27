@@ -3,6 +3,15 @@ import { formService } from "@repo/services/form/index";
 import { publicProcedure, protectedProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
 import { TRPCError } from "@trpc/server";
+import {
+  formOutputSchema,
+  getFormByIdOutputSchema,
+  createFormInputSchema,
+  updateFormInputSchema,
+  updateFormFieldsInputSchema,
+  startOrUpdateResponseInputSchema,
+  submitResponseInputSchema,
+} from "@repo/shared";
 
 const TAGS = ["Forms"];
 const getPath = generatePath("/forms");
@@ -41,24 +50,6 @@ function checkRateLimit(ip: string | undefined, bucket: "submit" | "partial") {
   timestamps.push(now);
   limitsMap.set(ip, timestamps);
 }
-
-// Reusable form output schema (includes new fields)
-const formOutputSchema = z.object({
-  id: z.string(),
-  creatorId: z.string(),
-  title: z.string(),
-  description: z.string().nullable(),
-  status: z.string(),
-  visibility: z.string(),
-  theme: z.string(),
-  customSlug: z.string().nullable(),
-  expiryDate: z.date().nullable(),
-  responseLimit: z.number().nullable(),
-  isArchived: z.boolean(),
-  isPasswordProtected: z.boolean().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
 
 export const formRouter = router({
   getForms: protectedProcedure
@@ -136,39 +127,7 @@ export const formRouter = router({
       },
     })
     .input(z.object({ id: z.string() }))
-    .output(
-      z.object({
-        id: z.string(),
-        creatorId: z.string(),
-        title: z.string(),
-        description: z.string().nullable(),
-        status: z.string(),
-        visibility: z.string(),
-        theme: z.string(),
-        customSlug: z.string().nullable(),
-        expiryDate: z.date().nullable(),
-        responseLimit: z.number().nullable(),
-        isArchived: z.boolean(),
-        isPasswordProtected: z.boolean(),
-        createdAt: z.date(),
-        updatedAt: z.date(),
-        fields: z.array(
-          z.object({
-            id: z.string(),
-            formId: z.string(),
-            type: z.string(),
-            label: z.string(),
-            placeholder: z.string().nullable(),
-            required: z.boolean(),
-            orderIndex: z.number(),
-            options: z.unknown().nullable(),
-            validationRules: z.unknown().nullable(),
-            conditionalLogic: z.unknown().nullable(),
-            createdAt: z.date(),
-          }),
-        ),
-      }),
-    )
+    .output(getFormByIdOutputSchema)
     .query(async ({ input, ctx }) => {
       return await formService.getFormById(input.id, ctx.userId ?? undefined);
     }),
@@ -183,14 +142,7 @@ export const formRouter = router({
         description: "Creates a new form in draft state for the authenticated user.",
       },
     })
-    .input(
-      z.object({
-        title: z.string().min(1, "Title is required"),
-        description: z.string().optional(),
-        theme: z.string().optional(),
-        visibility: z.enum(["public", "unlisted"]).optional(),
-      }),
-    )
+    .input(createFormInputSchema)
     .output(
       z.object({
         id: z.string(),
@@ -221,19 +173,7 @@ export const formRouter = router({
           "Updates form metadata including title, status, visibility, theme, custom slug, expiry, and response limit.",
       },
     })
-    .input(
-      z.object({
-        id: z.string(),
-        title: z.string().optional(),
-        description: z.string().optional(),
-        status: z.enum(["draft", "published", "closed"]).optional(),
-        visibility: z.enum(["public", "unlisted"]).optional(),
-        theme: z.string().optional(),
-        customSlug: z.string().optional().nullable(),
-        expiryDate: z.date().optional().nullable(),
-        responseLimit: z.number().optional().nullable(),
-      }),
-    )
+    .input(updateFormInputSchema)
     .output(formOutputSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
@@ -394,41 +334,8 @@ export const formRouter = router({
           "Atomically replaces all fields for a form in a single transaction. Blocked if the form has existing responses.",
       },
     })
-    .input(
-      z.object({
-        formId: z.string(),
-        fields: z.array(
-          z.object({
-            id: z.string().optional(),
-            type: z.string(),
-            label: z.string(),
-            placeholder: z.string().optional().nullable(),
-            required: z.boolean(),
-            orderIndex: z.number(),
-            options: z.unknown().optional().nullable(),
-            validationRules: z.unknown().optional().nullable(),
-            conditionalLogic: z.unknown().optional().nullable(),
-          }),
-        ),
-      }),
-    )
-    .output(
-      z.array(
-        z.object({
-          id: z.string(),
-          formId: z.string(),
-          type: z.string(),
-          label: z.string(),
-          placeholder: z.string().nullable(),
-          required: z.boolean(),
-          orderIndex: z.number(),
-          options: z.unknown().nullable(),
-          validationRules: z.unknown().nullable(),
-          conditionalLogic: z.unknown().nullable(),
-          createdAt: z.date(),
-        }),
-      ),
-    )
+    .input(updateFormFieldsInputSchema)
+    .output(getFormByIdOutputSchema.shape.fields)
     .mutation(async ({ input, ctx }) => {
       return await formService.updateFormFields(ctx.userId, input.formId, input.fields);
     }),
@@ -444,17 +351,7 @@ export const formRouter = router({
           "Called on each question navigation. Creates a new partial response or updates an existing one. Includes honeypot and rate-limit spam protection.",
       },
     })
-    .input(
-      z.object({
-        formId: z.string(),
-        responseId: z.string().optional(),
-        fieldId: z.string(),
-        answer: z.unknown(),
-        respondentEmail: z.string().optional(),
-        deviceToken: z.string().optional(),
-        honeypot: z.string().optional(), // Honeypot spam protection field
-      }),
-    )
+    .input(startOrUpdateResponseInputSchema)
     .output(
       z.object({
         responseId: z.string(),
@@ -488,20 +385,7 @@ export const formRouter = router({
           "Marks a response as completed, saves all final answers, and triggers a thank-you email to the respondent and a notification email to the form creator.",
       },
     })
-    .input(
-      z.object({
-        formId: z.string(),
-        responseId: z.string(),
-        answers: z.array(
-          z.object({
-            fieldId: z.string(),
-            answer: z.unknown(),
-          }),
-        ),
-        respondentEmail: z.string().optional(),
-        honeypot: z.string().optional(), // Honeypot spam protection field
-      }),
-    )
+    .input(submitResponseInputSchema)
     .output(
       z.object({
         success: z.boolean(),

@@ -1,29 +1,21 @@
 import { z, zodUndefinedModel } from "../../schema";
 import { userService } from "../../services";
-import { getAuthenticationMethodOutputSchema } from "@repo/services/user/model";
 import { publicProcedure, protectedProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
+import { forgotPassword, resetPassword } from "@repo/services/user/password-reset";
+import {
+  getAuthenticationMethodOutputSchema,
+  authUserResponseSchema,
+  userProfileSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
+} from "@repo/shared";
+import { verifyEmail, resendVerificationEmail } from "@repo/services/user/email-verification";
 
 const TAGS = ["Authentication"];
 const getPath = generatePath("/authentication");
-
-const authUserResponseSchema = z.object({
-  token: z.string(),
-  user: z.object({
-    id: z.string(),
-    fullName: z.string(),
-    email: z.string(),
-    profileImageUrl: z.string().nullable(),
-  }),
-});
-
-const userProfileSchema = z.object({
-  id: z.string(),
-  fullName: z.string(),
-  email: z.string(),
-  isAdmin: z.boolean(),
-  profileImageUrl: z.string().nullable(),
-});
 
 export const authRouter = router({
   getSupportedAuthenticationProviders: publicProcedure
@@ -69,4 +61,59 @@ export const authRouter = router({
     .query(async ({ ctx }) => {
       return await userService.getUserById(ctx.userId);
     }),
+
+  /**
+   * POST /authentication/forgot-password
+   *
+   * Security: Always returns a generic success message regardless of whether
+   * the email exists. This prevents user enumeration attacks.
+   * Rate limited: 5 requests per hour per IP (enforced in Express middleware).
+   */
+  forgotPassword: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/forgot-password"), tags: TAGS } })
+    .input(forgotPasswordSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      // Service handles user lookup silently — no error on missing email
+      await forgotPassword(input.email);
+      return {
+        message:
+          "If an account with that email exists, a password reset link has been sent. Check your inbox.",
+      };
+    }),
+
+  /**
+   * POST /authentication/reset-password
+   *
+   * Security: Hashes the incoming token before DB lookup. Validates expiry.
+   * Enforces password strength. Clears token after use (single-use).
+   * Rate limited: 10 requests per hour per IP (enforced in Express middleware).
+   */
+  resetPassword: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/reset-password"), tags: TAGS } })
+    .input(resetPasswordSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      await resetPassword(input.token, input.newPassword);
+      return { message: "Your password has been reset successfully. You can now log in." };
+    }),
+
+  verifyEmail: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/verify-email"), tags: TAGS } })
+    .input(verifyEmailSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      await verifyEmail(input.token);
+      return { message: "Your email has been verified successfully. You can now log in." };
+    }),
+
+  resendVerification: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/resend-verification"), tags: TAGS } })
+    .input(resendVerificationSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      await resendVerificationEmail(input.email);
+      return { message: "If your account exists and is unverified, a new verification link has been sent." };
+    }),
 });
+

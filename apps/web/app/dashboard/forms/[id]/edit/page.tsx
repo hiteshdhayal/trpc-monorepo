@@ -38,7 +38,9 @@ import {
   CheckCircle2,
   Circle,
   Mail,
+  XCircle,
 } from "lucide-react";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { QRCodeSVG } from "qrcode.react";
 import {
   BarChart,
@@ -86,8 +88,9 @@ export default function FormBuilderPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [theme, setTheme] = useState("startup");
-  const [status, setStatus] = useState("published");
+  const [status, setStatus] = useState("draft");
   const [visibility, setVisibility] = useState("unlisted");
+  const [confirmRemovePassword, setConfirmRemovePassword] = useState(false);
   const [customSlug, setCustomSlug] = useState("");
   const [enableLimit, setEnableLimit] = useState(false);
   const [responseLimit, setResponseLimit] = useState<number>(100);
@@ -160,7 +163,7 @@ export default function FormBuilderPage() {
         setEnableExpiry(false);
       }
       // Populate password protection state
-      setIsPasswordProtected((form as any).isPasswordProtected ?? false);
+      setIsPasswordProtected(form.isPasswordProtected ?? false);
       if (form.fields.length > 0 && selectedFieldIdx === null) {
         setSelectedFieldIdx(0);
       }
@@ -238,7 +241,10 @@ export default function FormBuilderPage() {
   };
 
   const handleRemovePassword = () => {
-    if (!confirm("Remove password protection? Anyone with the link can fill this form.")) return;
+    setConfirmRemovePassword(true);
+  };
+
+  const executeRemovePassword = () => {
     setPasswordSaving(true);
     removePasswordMutation.mutate({ id: formId });
   };
@@ -251,8 +257,8 @@ export default function FormBuilderPage() {
       title,
       description: description ?? undefined,
       theme,
-      status: status as any,
-      visibility: visibility as any,
+      status: status as "draft" | "published" | "closed",
+      visibility: visibility as "public" | "unlisted",
       customSlug: customSlug.trim() ? customSlug.trim() : null,
       responseLimit: enableLimit ? Number(responseLimit) : null,
       expiryDate: enableExpiry && expiryDate ? new Date(expiryDate) : null,
@@ -452,7 +458,7 @@ export default function FormBuilderPage() {
       </header>
 
       {/* Main workspace */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         <Tabs value={activeTab} className="flex-1 flex flex-col md:flex-row">
           {/* TAB 1: BUILD WORKSPACE */}
           <TabsContent
@@ -1572,7 +1578,16 @@ export default function FormBuilderPage() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
+
+      <ConfirmDialog
+        open={confirmRemovePassword}
+        onOpenChange={setConfirmRemovePassword}
+        title="Remove Password Protection"
+        description="Remove password protection? Anyone with the link will be able to view and fill this form."
+        confirmText="Remove Password"
+        onConfirm={executeRemovePassword}
+      />
     </div>
   );
 }

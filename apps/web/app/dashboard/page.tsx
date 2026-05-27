@@ -36,7 +36,10 @@ import {
   Archive,
   ArchiveRestore,
   ShieldAlert,
+  Menu,
 } from "lucide-react";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -47,6 +50,7 @@ export default function DashboardPage() {
   const [newFormVisibility, setNewFormVisibility] = useState<"public" | "unlisted">("unlisted");
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [formToDelete, setFormToDelete] = useState<{ id: string; isArchived: boolean } | null>(null);
 
   // 1. Auth check
   const {
@@ -103,35 +107,66 @@ export default function DashboardPage() {
   });
 
   const deleteFormMutation = trpc.form.deleteForm.useMutation({
+    onMutate: async (deletedForm) => {
+      await utils.form.getForms.cancel();
+      await utils.form.getArchivedForms.cancel();
+      const previousForms = utils.form.getForms.getData();
+      const previousArchived = utils.form.getArchivedForms.getData();
+      utils.form.getForms.setData(undefined, (old: any) => old?.filter((f: any) => f.id !== deletedForm.id));
+      utils.form.getArchivedForms.setData(undefined, (old: any) => old?.filter((f: any) => f.id !== deletedForm.id));
+      return { previousForms, previousArchived };
+    },
     onSuccess: () => {
       toast.success("Form deleted successfully!");
+    },
+    onError: (err, newForm, context) => {
+      toast.error(err.message || "Failed to delete form.");
+      if (context?.previousForms) utils.form.getForms.setData(undefined, context.previousForms);
+      if (context?.previousArchived) utils.form.getArchivedForms.setData(undefined, context.previousArchived);
+    },
+    onSettled: () => {
       utils.form.getForms.invalidate();
       utils.form.getArchivedForms.invalidate();
-    },
-    onError: (err) => {
-      toast.error(err.message || "Failed to delete form.");
     },
   });
 
   const archiveFormMutation = trpc.form.archiveForm.useMutation({
+    onMutate: async (archivedForm) => {
+      await utils.form.getForms.cancel();
+      const previousForms = utils.form.getForms.getData();
+      utils.form.getForms.setData(undefined, (old: any) => old?.filter((f: any) => f.id !== archivedForm.id));
+      return { previousForms };
+    },
     onSuccess: () => {
       toast.success("Form archived.");
+    },
+    onError: (err, newForm, context) => {
+      toast.error(err.message || "Failed to archive form.");
+      if (context?.previousForms) utils.form.getForms.setData(undefined, context.previousForms);
+    },
+    onSettled: () => {
       utils.form.getForms.invalidate();
       utils.form.getArchivedForms.invalidate();
-    },
-    onError: (err) => {
-      toast.error(err.message || "Failed to archive form.");
     },
   });
 
   const unarchiveFormMutation = trpc.form.unarchiveForm.useMutation({
+    onMutate: async (unarchivedForm) => {
+      await utils.form.getArchivedForms.cancel();
+      const previousArchived = utils.form.getArchivedForms.getData();
+      utils.form.getArchivedForms.setData(undefined, (old: any) => old?.filter((f: any) => f.id !== unarchivedForm.id));
+      return { previousArchived };
+    },
     onSuccess: () => {
       toast.success("Form restored from archive.");
+    },
+    onError: (err, newForm, context) => {
+      toast.error(err.message || "Failed to restore form.");
+      if (context?.previousArchived) utils.form.getArchivedForms.setData(undefined, context.previousArchived);
+    },
+    onSettled: () => {
       utils.form.getForms.invalidate();
       utils.form.getArchivedForms.invalidate();
-    },
-    onError: (err) => {
-      toast.error(err.message || "Failed to restore form.");
     },
   });
 
@@ -199,13 +234,13 @@ export default function DashboardPage() {
   }
 
   const activeForms = forms?.filter(
-    (form) =>
+    (form: any) =>
       form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const filteredArchived = archivedForms?.filter(
-    (form) =>
+    (form: any) =>
       form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase())),
   );
@@ -225,7 +260,7 @@ export default function DashboardPage() {
             <span className="text-xl font-serif font-bold text-[#1A1008]">FinalForms</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <Link href="/explore">
               <Button
                 variant="ghost"
@@ -236,7 +271,6 @@ export default function DashboardPage() {
               </Button>
             </Link>
 
-            {/* Admin Panel link — only for admin users */}
             {user.isAdmin && (
               <Link href="/admin">
                 <Button
@@ -252,7 +286,7 @@ export default function DashboardPage() {
             <div className="h-8 w-px bg-[#D4C9B0]" />
 
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-[#6B5744] hidden sm:inline">
+              <span className="text-sm font-medium text-[#6B5744]">
                 {user.fullName}
               </span>
               <Button
@@ -265,6 +299,47 @@ export default function DashboardPage() {
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+
+          <div className="md:hidden flex items-center">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-[#1A1008]">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-[#FAF7F2] border-[#D4C9B0]">
+                <SheetHeader>
+                  <SheetTitle className="text-[#1A1008] text-left font-serif">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  <span className="text-sm font-medium text-[#6B5744] px-4 py-2 bg-[#EDE8DC] rounded-md">
+                    {user.fullName}
+                  </span>
+                  
+                  <Link href="/explore">
+                    <Button variant="ghost" className="w-full justify-start text-[#6B5744]">
+                      <Compass className="h-4 w-4 mr-2 text-[#C41E3A]" />
+                      Explore
+                    </Button>
+                  </Link>
+
+                  {user.isAdmin && (
+                    <Link href="/admin">
+                      <Button variant="ghost" className="w-full justify-start text-[#C41E3A]">
+                        <ShieldAlert className="h-4 w-4 mr-2" />
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+
+                  <Button variant="ghost" className="w-full justify-start text-[#C41E3A] hover:text-red-700" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Log out
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -334,7 +409,7 @@ export default function DashboardPage() {
           </div>
         ) : displayForms && displayForms.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayForms.map((form) => {
+            {displayForms.map((form: any) => {
               const themeBadgeColor =
                 form.theme === "hogwarts"
                   ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
@@ -356,7 +431,7 @@ export default function DashboardPage() {
                         >
                           {form.theme}
                         </Badge>
-                        {(form as any).isPasswordProtected && (
+                        {form.isPasswordProtected && (
                           <Badge
                             variant="outline"
                             className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-[9px] px-1.5 uppercase tracking-wider flex items-center gap-0.5"
@@ -430,13 +505,7 @@ export default function DashboardPage() {
                           variant="ghost"
                           className="h-8 w-8 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer ml-auto"
                           onClick={() => {
-                            if (
-                              confirm(
-                                "Permanently delete this archived form? All responses will be lost.",
-                              )
-                            ) {
-                              deleteFormMutation.mutate({ id: form.id });
-                            }
+                            setFormToDelete({ id: form.id, isArchived: true });
                           }}
                           title="Delete Permanently"
                           disabled={deleteFormMutation.isPending}
@@ -507,13 +576,7 @@ export default function DashboardPage() {
                             variant="ghost"
                             className="h-8 w-8 text-[#6B5744] hover:text-[#C41E3A] cursor-pointer"
                             onClick={() => {
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this form? All responses will be permanently removed.",
-                                )
-                              ) {
-                                deleteFormMutation.mutate({ id: form.id });
-                              }
+                              setFormToDelete({ id: form.id, isArchived: false });
                             }}
                             title="Delete Form"
                             disabled={deleteFormMutation.isPending}
@@ -605,7 +668,7 @@ export default function DashboardPage() {
                 id="formVisibility"
                 className="w-full bg-[#FAF7F2] border border-[#D4C9B0] text-[#1A1008] rounded-lg p-2 focus:border-[#C41E3A] outline-none"
                 value={newFormVisibility}
-                onChange={(e) => setNewFormVisibility(e.target.value as any)}
+                onChange={(e) => setNewFormVisibility(e.target.value as "public" | "unlisted")}
               >
                 <option value="unlisted">Unlisted (Accessible only via direct link)</option>
                 <option value="public">Public (Visible in public gallery)</option>
@@ -639,6 +702,23 @@ export default function DashboardPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!formToDelete}
+        onOpenChange={(open) => !open && setFormToDelete(null)}
+        title="Delete Form"
+        description={
+          formToDelete?.isArchived
+            ? "Permanently delete this archived form? All responses will be lost."
+            : "Are you sure you want to delete this form? All responses will be permanently removed."
+        }
+        confirmText="Delete"
+        onConfirm={() => {
+          if (formToDelete) {
+            deleteFormMutation.mutate({ id: formToDelete.id });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -29,6 +29,20 @@
       "when": 1779861375121,
       "tag": "0003_fair_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779888420216,
+      "tag": "0004_kind_maginty",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779891711950,
+      "tag": "0005_supreme_polaris",
+      "breakpoints": true
     }
   ]
 }

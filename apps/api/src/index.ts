@@ -5,13 +5,13 @@ import { env } from "./env";
 
 async function init() {
   // ── Step 0: raw env diagnostics (visible even if structured logger fails) ──
-  console.log("=== SERVER STARTUP ===");
-  console.log(`NODE_ENV        : ${process.env.NODE_ENV ?? "(not set)"}`);
-  console.log(`PORT            : ${process.env.PORT ?? "(not set, will use 8000)"}`);
-  console.log(`DATABASE_URL    : ${process.env.DATABASE_URL ? "✓ exists" : "✗ MISSING"}`);
-  console.log(`FRONTEND_URL    : ${process.env.FRONTEND_URL ? "✓ exists" : "✗ MISSING"}`);
-  console.log(`JWT_SECRET      : ${process.env.JWT_SECRET ? "✓ exists" : "✗ MISSING"}`);
-  console.log("======================");
+  logger.info("=== SERVER STARTUP ===");
+  logger.info(`NODE_ENV        : ${process.env.NODE_ENV ?? "(not set)"}`);
+  logger.info(`PORT            : ${process.env.PORT ?? "(not set, will use 8000)"}`);
+  logger.info(`DATABASE_URL    : ${process.env.DATABASE_URL ? "✓ exists" : "✗ MISSING"}`);
+  logger.info(`FRONTEND_URL    : ${process.env.FRONTEND_URL ? "✓ exists" : "✗ MISSING"}`);
+  logger.info(`JWT_SECRET      : ${process.env.JWT_SECRET ? "✓ exists" : "✗ MISSING"}`);
+  logger.info("======================");
 
   try {
     // ── Step 1: validate env schema (throws with field-level errors if invalid) ──
@@ -26,9 +26,7 @@ async function init() {
       await db.execute(sql`SELECT 1`);
       logger.info("[startup] ✓ Database connection OK");
     } catch (dbErr) {
-      logger.error("[startup] ✗ Database connection FAILED");
-      console.error(dbErr);
-      console.error((dbErr as Error)?.stack);
+      logger.error("[startup] ✗ Database connection FAILED", { err: dbErr });
       // Do not exit — let the app boot; DB errors will surface per-request
     }
 
@@ -47,17 +45,12 @@ async function init() {
     });
 
     server.on("error", (serverErr) => {
-      logger.error("[startup] HTTP server error", { serverErr });
-      console.error(serverErr);
-      console.error(serverErr.stack);
+      logger.error("[startup] HTTP server error", { err: serverErr });
       process.exit(1);
     });
   } catch (err) {
     // ── Fatal startup failure — log everything possible ──
-    logger.error("[startup] ✗ FATAL: server failed to start");
-    console.error("[startup] FATAL startup error:");
-    console.error(err);
-    console.error((err as Error)?.stack);
+    logger.error("[startup] ✗ FATAL: server failed to start", { err });
     process.exit(1);
   }
 }
