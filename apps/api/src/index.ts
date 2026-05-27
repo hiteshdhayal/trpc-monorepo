@@ -37,7 +37,7 @@ async function init() {
 
     // ── Step 4: create HTTP server and start listening ──
     const server = http.createServer(app);
-    const PORT: number = env.PORT ? +env.PORT : 8000;
+    const PORT: number = +env.PORT;
 
     logger.info(`[startup] Starting HTTP server on port ${PORT}...`);
     server.listen(PORT, () => {

@@ -4,9 +4,17 @@
  * Uses Resend for transactional emails.
  * Set RESEND_API_KEY in your .env to enable real sending.
  * If the key is absent, emails are logged to console (dev-safe stub).
+ *
+ * Environment variables used:
+ *  - RESEND_API_KEY  : Resend API key (required for real sends)
+ *  - EMAIL_FROM      : "From" address, e.g. "FinalForms <noreply@yourdomain.com>"
+ *  - APP_URL         : Public app URL for links in emails, e.g. "https://finalforms.com"
  */
 
 import { logger } from "@repo/logger";
+
+const EMAIL_FROM = process.env.EMAIL_FROM ?? "FinalForms <noreply@example.com>";
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 interface EmailPayload {
   to: string;
@@ -32,7 +40,7 @@ async function sendEmail(payload: EmailPayload): Promise<void> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "FinalForms <noreply@finalforms.com>",
+      from: EMAIL_FROM,
       to: [payload.to],
       subject: payload.subject,
       html: payload.html,
@@ -87,7 +95,7 @@ export const emailService = {
         <tbody>${answersHtml}</tbody>
       </table>
       <p style="color:#6b7280;font-size:11px;margin:20px 0 0;text-align:center">
-        Powered by <a href="https://finalforms.com" style="color:#6366f1;text-decoration:none">FinalForms</a>
+        Powered by <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">FinalForms</a>
       </p>
     </div>
   </div>
@@ -121,11 +129,11 @@ export const emailService = {
       </p>
     </div>
     <div style="padding:0 24px 24px;text-align:center">
-      <a href="https://finalforms.com/dashboard" style="display:inline-block;background:#4f46e5;color:#fff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;box-shadow:0 4px 15px rgba(79,70,229,0.35)">
+      <a href="${APP_URL}/dashboard" style="display:inline-block;background:#4f46e5;color:#fff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;box-shadow:0 4px 15px rgba(79,70,229,0.35)">
         View Response →
       </a>
       <p style="color:#4b5563;font-size:11px;margin:16px 0 0">
-        Powered by <a href="https://finalforms.com" style="color:#6366f1;text-decoration:none">FinalForms</a>
+        Powered by <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">FinalForms</a>
       </p>
     </div>
   </div>
@@ -176,10 +184,10 @@ export const emailService = {
       </div>
       <div style="border-top:1px solid #1f1f1f;padding-top:16px">
         <p style="color:#6b7280;font-size:11px;margin:0;line-height:1.5">
-          🛡️ <strong>Anti-phishing reminder:</strong> FinalForms will never ask for your password via email. This link only allows you to set a new password on our website. If the button above doesn't work, do NOT copy the link manually — visit <a href="https://finalforms.com" style="color:#6366f1;text-decoration:none">finalforms.com</a> directly and use "Forgot password".
+          🛡️ <strong>Anti-phishing reminder:</strong> FinalForms will never ask for your password via email. This link only allows you to set a new password on our website. If the button above doesn't work, do NOT copy the link manually — visit <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">our website</a> directly and use "Forgot password".
         </p>
         <p style="color:#4b5563;font-size:11px;margin:12px 0 0;text-align:center">
-          Powered by <a href="https://finalforms.com" style="color:#6366f1;text-decoration:none">FinalForms</a>
+          Powered by <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">FinalForms</a>
         </p>
       </div>
     </div>
@@ -223,7 +231,7 @@ export const emailService = {
       </div>
       <div style="border-top:1px solid #1f1f1f;padding-top:16px">
         <p style="color:#4b5563;font-size:11px;margin:12px 0 0;text-align:center">
-          Powered by <a href="https://finalforms.com" style="color:#6366f1;text-decoration:none">FinalForms</a>
+          Powered by <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">FinalForms</a>
         </p>
       </div>
     </div>

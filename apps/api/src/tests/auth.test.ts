@@ -7,15 +7,21 @@ import { TRPCError } from "@trpc/server";
 
 describe("Authentication Flow", () => {
   it("Register with valid email and password succeeds and returns a session", async () => {
+    console.log("=== DEBUG ENV ===");
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("TEST_DATABASE_URL:", process.env.TEST_DATABASE_URL);
+    console.log("DATABASE_URL:", process.env.DATABASE_URL);
+    console.log("=================");
     const caller = createTestCaller();
     const result = await caller.auth.register({
-      name: "Test User",
+      fullName: "Test User",
       email: "test@example.com",
       password: "password123",
     });
 
-    expect(result.success).toBe(true);
-    expect(result.session).toBeDefined();
+    expect(result.token).toBeDefined();
+    expect(result.user).toBeDefined();
+    expect(result.user.fullName).toBe("Test User");
 
     // Verify user is in DB
     const users = await testDb
@@ -23,7 +29,7 @@ describe("Authentication Flow", () => {
       .from(usersTable)
       .where(eq(usersTable.email, "test@example.com"));
     expect(users.length).toBe(1);
-    expect(users[0]?.name).toBe("Test User");
+    expect(users[0]?.fullName).toBe("Test User");
   });
 
   it("Register with duplicate email returns a proper error", async () => {
@@ -31,7 +37,7 @@ describe("Authentication Flow", () => {
 
     // First registration
     await caller.auth.register({
-      name: "Test User 1",
+      fullName: "Test User 1",
       email: "duplicate@example.com",
       password: "password123",
     });
@@ -39,7 +45,7 @@ describe("Authentication Flow", () => {
     // Second registration with same email
     try {
       await caller.auth.register({
-        name: "Test User 2",
+        fullName: "Test User 2",
         email: "duplicate@example.com",
         password: "password456",
       });
@@ -58,10 +64,16 @@ describe("Authentication Flow", () => {
 
     // Create user first
     await caller.auth.register({
-      name: "Login Test",
+      fullName: "Login Test",
       email: "login@example.com",
       password: "correctpassword",
     });
+
+    // Manually verify user's email in DB to allow login
+    await testDb
+      .update(usersTable)
+      .set({ emailVerified: true })
+      .where(eq(usersTable.email, "login@example.com"));
 
     // Attempt login
     const result = await caller.auth.login({
@@ -69,8 +81,9 @@ describe("Authentication Flow", () => {
       password: "correctpassword",
     });
 
-    expect(result.success).toBe(true);
-    expect(result.session).toBeDefined();
+    expect(result.token).toBeDefined();
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe("login@example.com");
   });
 
   it("Login with wrong password returns unauthorized error", async () => {
@@ -78,10 +91,16 @@ describe("Authentication Flow", () => {
 
     // Create user first
     await caller.auth.register({
-      name: "Login Fail Test",
+      fullName: "Login Fail Test",
       email: "loginfail@example.com",
       password: "correctpassword",
     });
+
+    // Manually verify user's email in DB to allow login
+    await testDb
+      .update(usersTable)
+      .set({ emailVerified: true })
+      .where(eq(usersTable.email, "loginfail@example.com"));
 
     // Attempt login with wrong password
     try {
@@ -118,7 +137,7 @@ describe("Authentication Flow", () => {
     // Setup a user directly in DB
     const caller = createTestCaller();
     await caller.auth.register({
-      name: "Protected Test",
+      fullName: "Protected Test",
       email: "protected@example.com",
       password: "password",
     });

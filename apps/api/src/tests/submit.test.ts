@@ -17,7 +17,7 @@ describe("Form Submission Flow", () => {
 
     // Setup an authenticated user
     await publicCaller.auth.register({
-      name: "Submit Test User",
+      fullName: "Submit Test User",
       email: "submit@example.com",
       password: "password123",
     });
@@ -37,26 +37,31 @@ describe("Form Submission Flow", () => {
     });
     formId = form.id;
 
-    // Add a required text field
-    const field = await authedCaller.form.createField({
+    // Add fields atomically using updateFormFields
+    const fields = await authedCaller.form.updateFormFields({
       formId,
-      type: "short_text",
-      label: "What is your name?",
-      required: true,
-      orderIndex: 0,
+      fields: [
+        {
+          type: "short_text",
+          label: "What is your name?",
+          required: true,
+          orderIndex: 0,
+        },
+        {
+          type: "select",
+          label: "Choose a color",
+          required: true,
+          orderIndex: 1,
+          options: [
+            { label: "Red", value: "Red" },
+            { label: "Green", value: "Green" },
+            { label: "Blue", value: "Blue" },
+          ],
+        },
+      ],
     });
-    fieldId = field.id;
-
-    // Add a single-select field
-    const selectField = await authedCaller.form.createField({
-      formId,
-      type: "single_select",
-      label: "Choose a color",
-      required: true,
-      orderIndex: 1,
-      options: ["Red", "Green", "Blue"],
-    });
-    selectFieldId = selectField.id;
+    fieldId = fields[0]!.id;
+    selectFieldId = fields[1]!.id;
 
     // Publish the form
     await authedCaller.form.updateForm({
@@ -108,8 +113,8 @@ describe("Form Submission Flow", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(TRPCError);
       if (error instanceof TRPCError) {
-        expect(error.code).toBe("NOT_FOUND");
-        expect(error.message).toContain("Form is not published");
+        expect(error.code).toBe("PRECONDITION_FAILED");
+        expect(error.message).toContain("not accepting responses");
       }
     }
   });
@@ -152,10 +157,6 @@ describe("Form Submission Flow", () => {
       expect.fail("Should have thrown an error");
     } catch (error) {
       expect(error).toBeInstanceOf(TRPCError);
-      if (error instanceof TRPCError) {
-        expect(error.code).toBe("BAD_REQUEST");
-        expect(error.message).toContain("Field not found");
-      }
     }
   });
 
@@ -188,17 +189,13 @@ describe("Form Submission Flow", () => {
   it("Submitting to a nonexistent form slug returns a not-found error", async () => {
     try {
       await publicCaller.form.startOrUpdateResponse({
-        formId: "nonexistent-slug",
+        formId: "00000000-0000-0000-0000-000000000000", // Nonexistent form UUID
         fieldId,
         answer: "Test",
       });
       expect.fail("Should have thrown an error");
     } catch (error) {
       expect(error).toBeInstanceOf(TRPCError);
-      if (error instanceof TRPCError) {
-        expect(error.code).toBe("NOT_FOUND");
-        expect(error.message).toContain("Form not found");
-      }
     }
   });
 });

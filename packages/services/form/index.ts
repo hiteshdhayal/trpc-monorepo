@@ -39,7 +39,7 @@ function sanitizeAnswer(type: string, value: any): any {
 
 /** Validate a field answer against its validationRules */
 function validateFieldAnswer(
-  field: { type: string; label: string; required: boolean; validationRules: any },
+  field: { type: string; label: string; required: boolean; validationRules: any; options?: any },
   answer: any,
 ): void {
   // Fix 6: Server-side email format validation for email fields
@@ -49,6 +49,18 @@ function validateFieldAnswer(
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: `"${field.label}" must be a valid email address.`,
+      });
+    }
+  }
+
+  // Validate option values for select/checkbox fields
+  if (field.type === "select" && answer !== undefined && answer !== null && answer !== "") {
+    const opts = (field.options as Array<{ label: string; value: string }>) || [];
+    const validValues = opts.map(o => o.value || o.label);
+    if (!validValues.includes(answer)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Invalid option selected for "${field.label}".`,
       });
     }
   }

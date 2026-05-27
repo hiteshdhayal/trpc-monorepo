@@ -1,8 +1,47 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("./index");
 const schema_1 = require("./schema");
-const auth_1 = require("@repo/services/user/auth");
+const drizzle_orm_1 = require("drizzle-orm");
+const crypto = __importStar(require("crypto"));
+function hashPassword(password) {
+    const salt = crypto.randomBytes(16).toString("hex");
+    const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+    return `${salt}:${hash}`;
+}
 async function main() {
     console.log("🌱 Starting seeding process...");
     // 1. Create default creator user
@@ -17,7 +56,7 @@ async function main() {
             .values({
             fullName: "Final Admin",
             email: adminEmail,
-            passwordHash: (0, auth_1.hashPassword)("password123"),
+            passwordHash: hashPassword("password123"),
             emailVerified: true,
         })
             .returning();
@@ -33,12 +72,11 @@ async function main() {
     });
     if (existingForms.length > 0) {
         console.log("🧹 Clearing old seed data...");
-        const formIds = existingForms.map((f) => f.id);
-        await index_1.db.delete(schema_1.formsTable).where((forms) => forms.creatorId.eq(userId));
+        await index_1.db.delete(schema_1.formsTable).where((0, drizzle_orm_1.eq)(schema_1.formsTable.creatorId, userId));
     }
     // 2. Insert Hogwarts Sorting Hat Form (Public)
     console.log("🏰 Seeding 'Hogwarts Sorting Hat' Form...");
-    const [hogwartsForm] = await index_1.db
+    const [hogwartsForm] = (await index_1.db
         .insert(schema_1.formsTable)
         .values({
         creatorId: userId,
@@ -49,7 +87,7 @@ async function main() {
         theme: "hogwarts",
         customSlug: "sorting-hat",
     })
-        .returning();
+        .returning());
     const hwFieldsData = [
         {
             formId: hogwartsForm.id,
@@ -100,7 +138,7 @@ async function main() {
     const hwFields = await index_1.db.insert(schema_1.formFieldsTable).values(hwFieldsData).returning();
     // 3. Insert Cyberpunk Bug Report Form (Public)
     console.log("🏙️ Seeding 'Cyberpunk 2077 Bug Report' Form...");
-    const [cyberpunkForm] = await index_1.db
+    const [cyberpunkForm] = (await index_1.db
         .insert(schema_1.formsTable)
         .values({
         creatorId: userId,
@@ -111,7 +149,7 @@ async function main() {
         theme: "cyberpunk",
         customSlug: "cyber-glitch",
     })
-        .returning();
+        .returning());
     const cpFieldsData = [
         {
             formId: cyberpunkForm.id,
@@ -161,7 +199,7 @@ async function main() {
     const cpFields = await index_1.db.insert(schema_1.formFieldsTable).values(cpFieldsData).returning();
     // 4. Insert YC Application Form (Unlisted)
     console.log("🚀 Seeding 'YC Application' Form...");
-    const [ycForm] = await index_1.db
+    const [ycForm] = (await index_1.db
         .insert(schema_1.formsTable)
         .values({
         creatorId: userId,
@@ -171,7 +209,7 @@ async function main() {
         visibility: "unlisted",
         theme: "startup",
     })
-        .returning();
+        .returning());
     const ycFieldsData = [
         {
             formId: ycForm.id,
@@ -222,7 +260,7 @@ async function main() {
     for (let i = 0; i < 30; i++) {
         const isCompleted = i < 22;
         const lastAnsweredIdx = isCompleted ? 3 : Math.floor(Math.random() * 3); // 0, 1, 2
-        const [res] = await index_1.db
+        const [res] = (await index_1.db
             .insert(schema_1.responsesTable)
             .values({
             formId: hogwartsForm.id,
@@ -231,7 +269,7 @@ async function main() {
             lastAnsweredFieldId: hwFields[lastAnsweredIdx].id,
             submittedAt: new Date(Date.now() - i * 6 * 3600 * 1000), // Spaced over several days
         })
-            .returning();
+            .returning());
         // Insert answers up to the last answered field index
         for (let j = 0; j <= lastAnsweredIdx; j++) {
             const field = hwFields[j];
@@ -264,7 +302,7 @@ async function main() {
     for (let i = 0; i < 20; i++) {
         const isCompleted = i < 14;
         const lastAnsweredIdx = isCompleted ? 3 : Math.floor(Math.random() * 3);
-        const [res] = await index_1.db
+        const [res] = (await index_1.db
             .insert(schema_1.responsesTable)
             .values({
             formId: cyberpunkForm.id,
@@ -273,7 +311,7 @@ async function main() {
             lastAnsweredFieldId: cpFields[lastAnsweredIdx].id,
             submittedAt: new Date(Date.now() - i * 8 * 3600 * 1000),
         })
-            .returning();
+            .returning());
         for (let j = 0; j <= lastAnsweredIdx; j++) {
             const field = cpFields[j];
             let answerVal = "";
@@ -287,9 +325,7 @@ async function main() {
             else if (field.type === "checkbox") {
                 // Randomly select multiple options
                 const opts = field.options;
-                answerVal = opts
-                    .filter(() => Math.random() > 0.5)
-                    .map((o) => o.value);
+                answerVal = opts.filter(() => Math.random() > 0.5).map((o) => o.value);
                 if (answerVal.length === 0)
                     answerVal = [opts[0].value];
             }
@@ -313,7 +349,7 @@ async function main() {
     for (let i = 0; i < 15; i++) {
         const isCompleted = i < 12;
         const lastAnsweredIdx = isCompleted ? 3 : Math.floor(Math.random() * 3);
-        const [res] = await index_1.db
+        const [res] = (await index_1.db
             .insert(schema_1.responsesTable)
             .values({
             formId: ycForm.id,
@@ -322,7 +358,7 @@ async function main() {
             lastAnsweredFieldId: ycFields[lastAnsweredIdx].id,
             submittedAt: new Date(Date.now() - i * 12 * 3600 * 1000),
         })
-            .returning();
+            .returning());
         for (let j = 0; j <= lastAnsweredIdx; j++) {
             const field = ycFields[j];
             let answerVal = "";

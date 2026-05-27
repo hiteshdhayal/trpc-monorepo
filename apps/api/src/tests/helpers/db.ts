@@ -17,6 +17,11 @@ export const testDb = drizzle(process.env.TEST_DATABASE_URL, { schema });
 
 // Helper to clean database between tests
 beforeEach(async () => {
+  console.log("--- TEST RUN ENV INFO ---");
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("TEST_DATABASE_URL:", process.env.TEST_DATABASE_URL);
+  console.log("DATABASE_URL:", process.env.DATABASE_URL);
+  console.log("-------------------------");
   // Disable foreign key checks for truncation (PostgreSQL CASCADE handles this)
   await testDb.execute(sql`
     TRUNCATE TABLE 

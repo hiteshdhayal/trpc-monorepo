@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "~/trpc/client";
+import { env } from "~/env.js";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -375,7 +376,7 @@ export default function FormBuilderPage() {
 
   const formShareUrl = mounted
     ? `${window.location.origin}/forms/${form?.customSlug || formId}`
-    : `https://finalforms.com/forms/${form?.customSlug || formId}`;
+    : `${env.NEXT_PUBLIC_APP_URL ?? ""}/forms/${form?.customSlug || formId}`;
 
   if (formLoading || !form) {
     return (

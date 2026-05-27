@@ -13,14 +13,14 @@ exports.formsTable = (0, pg_core_1.pgTable)("forms", {
         .notNull(),
     title: (0, pg_core_1.varchar)("title", { length: 255 }).notNull(),
     description: (0, pg_core_1.text)("description"),
-    status: (0, pg_core_1.varchar)("status", { length: 50 }).default("draft").notNull(),
-    visibility: (0, pg_core_1.varchar)("visibility", { length: 50 }).default("public").notNull(),
-    theme: (0, pg_core_1.varchar)("theme", { length: 50 }).default("default").notNull(),
+    status: (0, pg_core_1.varchar)("status", { length: 50 }).default("draft").notNull(), // draft, published, closed
+    visibility: (0, pg_core_1.varchar)("visibility", { length: 50 }).default("public").notNull(), // public, unlisted
+    theme: (0, pg_core_1.varchar)("theme", { length: 50 }).default("default").notNull(), // default, cyberpunk, hogwarts, startup
     customSlug: (0, pg_core_1.varchar)("custom_slug", { length: 100 }).unique(),
     expiryDate: (0, pg_core_1.timestamp)("expiry_date"),
     responseLimit: (0, pg_core_1.integer)("response_limit"),
-    isArchived: (0, pg_core_1.boolean)("is_archived").default(false).notNull(),
-    passwordHash: (0, pg_core_1.text)("password_hash"),
+    isArchived: (0, pg_core_1.boolean)("is_archived").default(false).notNull(), // soft-delete / archive state
+    passwordHash: (0, pg_core_1.text)("password_hash"), // nullable — bcrypt hash for password-protected forms
     createdAt: (0, pg_core_1.timestamp)("created_at").defaultNow().notNull(),
     updatedAt: (0, pg_core_1.timestamp)("updated_at")
         .defaultNow()
@@ -39,4 +39,3 @@ exports.formsRelations = (0, drizzle_orm_1.relations)(exports.formsTable, ({ one
     fields: many(formField_1.formFieldsTable),
     responses: many(response_1.responsesTable),
 }));
-

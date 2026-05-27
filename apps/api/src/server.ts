@@ -15,7 +15,8 @@ import { userService } from "@repo/services/user/index";
 
 // Import and validate env at startup
 import { env } from "./env";
-import { csrfMiddleware } from "./middleware/csrf";
+import cookieParser from "cookie-parser";
+import { generateToken, doubleCsrfProtection, invalidCsrfTokenError } from "./middleware/csrf";
 import {
   forgotPasswordRateLimiter,
   resetPasswordRateLimiter,
@@ -28,40 +29,69 @@ export async function createApp() {
   // Fix: enable trust proxy so req.ip is correctly populated from x-forwarded-for
   app.set("trust proxy", true);
 
+  app.disable("x-powered-by");
+
   // ── Security: Helmet with strict headers ─────────────────────────────────────
   app.use(
     helmet({
-      contentSecurityPolicy: {
+      contentSecurityPolicy: env.NODE_ENV === "production" ? {
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"], // needed for Scalar docs UI
           imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'"],
+          connectSrc: ["'self'", env.FRONTEND_URL, "https://accounts.google.com"],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           frameSrc: ["'none'"],
           upgradeInsecureRequests: [],
         },
-      },
+      } : false,
+      frameguard: { action: "deny" },
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+      noSniff: true,
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
       crossOriginEmbedderPolicy: false, // needed for Scalar docs
     }),
   );
 
   // ── Security: Strict CORS ─────────────────────────────────────────────────────
+  // Build allowed origins from env — no hardcoded values
+  const corsOrigins: string[] = [env.FRONTEND_URL];
+  if (env.CORS_ADDITIONAL_ORIGINS) {
+    env.CORS_ADDITIONAL_ORIGINS.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean)
+      .forEach((o) => corsOrigins.push(o));
+  }
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: corsOrigins,
       credentials: true,
     }),
   );
+
+  // ── Cookie Parser (MUST be before CSRF and Auth) ─────────────────────────────
+  app.use(cookieParser());
 
   // ── Security: Body size limit (prevents large-payload DoS) ───────────────────
   app.use(express.json({ limit: "10kb" }));
   app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 
-  // ── Security: CSRF protection (double-submit cookie) ─────────────────────────
-  app.use(csrfMiddleware);
+  // ── Security: CSRF protection & Token Endpoint ───────────────────────────────
+  app.get("/api/csrf-token", (req, res) => {
+    res.json({ csrfToken: generateToken(req, res) });
+  });
+
+  app.use(doubleCsrfProtection);
+  
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err == invalidCsrfTokenError) {
+      res.status(403).json({ error: "Invalid CSRF token" });
+    } else {
+      next(err);
+    }
+  });
 
   const openApiDocument = generateOpenApiDocument(serverRouter, {
     title: "FinalForms OpenAPI",
@@ -227,31 +257,17 @@ export async function createApp() {
    * Express GET route is the correct and intentional solution.
    * ─────────────────────────────────────────────────────────────────────────────
    */
+  // ── Cookie Parser (update CSV auth to use req.cookies) ─────────────────────
   app.get("/api/forms/:formId/csv", async (req: any, res: any) => {
     try {
       const { formId } = req.params;
       let userId: string | null = null;
 
-      // Check token from cookies or authorization header
-      const cookieHeader = req.headers.cookie;
-      if (cookieHeader) {
-        const cookies = cookieHeader.split(";").reduce(
-          (acc: any, cookie: any) => {
-            const [key, val] = cookie.trim().split("=");
-            if (key && val) {
-              acc[key] = decodeURIComponent(val);
-            }
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        if (cookies.session_token) {
-          const decoded = verifyJwt(cookies.session_token);
-          if (decoded && decoded.userId) {
-            userId = decoded.userId;
-          }
-        }
+      // Use cookie-parser's populated req.cookies (cookie-parser is registered above)
+      const sessionToken = req.cookies?.session_token;
+      if (sessionToken) {
+        const decoded = verifyJwt(sessionToken);
+        if (decoded && decoded.userId) userId = decoded.userId;
       }
 
       if (!userId) {

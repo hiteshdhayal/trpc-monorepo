@@ -37,8 +37,18 @@ export const authRouter = router({
       }),
     )
     .output(authUserResponseSchema)
-    .mutation(async ({ input }) => {
-      return await userService.register(input.fullName, input.email, input.password);
+    .mutation(async ({ input, ctx }) => {
+      const result = await userService.register(input.fullName, input.email, input.password);
+      if (ctx.res) {
+        ctx.res.cookie("session_token", result.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        });
+      }
+      return result;
     }),
 
   login: publicProcedure
@@ -50,8 +60,18 @@ export const authRouter = router({
       }),
     )
     .output(authUserResponseSchema)
-    .mutation(async ({ input }) => {
-      return await userService.login(input.email, input.password);
+    .mutation(async ({ input, ctx }) => {
+      const result = await userService.login(input.email, input.password);
+      if (ctx.res) {
+        ctx.res.cookie("session_token", result.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+        });
+      }
+      return result;
     }),
 
   me: protectedProcedure
@@ -115,5 +135,29 @@ export const authRouter = router({
       await resendVerificationEmail(input.email);
       return { message: "If your account exists and is unverified, a new verification link has been sent." };
     }),
+
+  /**
+   * POST /authentication/logout
+   *
+   * Clears the httpOnly session_token cookie server-side.
+   * Because the cookie is httpOnly, the frontend cannot clear it via JS —
+   * this server-side endpoint is the only correct way to log out.
+   */
+  logout: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/logout"), tags: TAGS } })
+    .input(zodUndefinedModel)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ ctx }) => {
+      if (ctx.res) {
+        ctx.res.clearCookie("session_token", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+        });
+      }
+      return { message: "Logged out successfully." };
+    }),
 });
+
 

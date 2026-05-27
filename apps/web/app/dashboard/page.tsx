@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "~/trpc/client";
-import { clearSessionToken } from "~/lib/auth";
 import { Button } from "~/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -170,10 +169,15 @@ export default function DashboardPage() {
     },
   });
 
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => {
+      toast.success("Logged out successfully.");
+      router.push("/auth/login");
+    }
+  });
+
   const handleLogout = () => {
-    clearSessionToken();
-    toast.success("Logged out successfully.");
-    router.push("/auth/login");
+    logoutMutation.mutate();
   };
 
   const handleCreateForm = (e: React.FormEvent) => {

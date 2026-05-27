@@ -5,24 +5,12 @@ export async function createContext({ req, res }: trpcExpress.CreateExpressConte
   let userId: string | null = null;
 
   // 1. Parse cookie header manually for cookies
-  const cookieHeader = req?.headers?.cookie;
-  if (cookieHeader) {
-    const cookies = cookieHeader.split(";").reduce(
-      (acc, cookie) => {
-        const [key, val] = cookie.trim().split("=");
-        if (key && val) {
-          acc[key] = decodeURIComponent(val);
-        }
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    if (cookies.session_token) {
-      const decoded = verifyJwt(cookies.session_token);
-      if (decoded && decoded.userId) {
-        userId = decoded.userId;
-      }
+  // Use cookie-parser's populated req.cookies object
+  const cookies = req?.cookies || {};
+  if (cookies.session_token) {
+    const decoded = verifyJwt(cookies.session_token);
+    if (decoded && decoded.userId) {
+      userId = decoded.userId;
     }
   }
 

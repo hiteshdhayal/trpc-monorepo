@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { trpc } from "~/trpc/client";
-import { setSessionToken } from "~/lib/auth";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { env } from "~/env.js";
@@ -27,7 +26,6 @@ export default function LoginPage() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
-      setSessionToken(data.token);
       toast.success(`Welcome back, ${data.user.fullName}!`);
       router.push("/dashboard");
     },
@@ -130,7 +128,9 @@ export default function LoginPage() {
             variant="outline"
             className="w-full border-[#D4C9B0] hover:bg-[#EDE8DC] bg-[#FAF7F2] text-[#1A1008] flex items-center justify-center gap-2.5 font-medium rounded-lg py-2.5 shadow-sm transition-colors duration-200 cursor-pointer"
             onClick={() => {
-              const apiBaseUrl = (env.NEXT_PUBLIC_API_URL || "http://localhost:8000/trpc").replace(/\/trpc$/, "");
+              const apiBaseUrl =
+                env.NEXT_PUBLIC_API_BASE_URL ||
+                (env.NEXT_PUBLIC_API_URL || "").replace(/\/trpc$/, "");
               window.location.href = `${apiBaseUrl}/auth/google`;
             }}
           >

@@ -32,19 +32,25 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.db = void 0;
-require("dotenv/config");
 const node_postgres_1 = require("drizzle-orm/node-postgres");
-const env_1 = require("./env");
+const pg_1 = require("pg");
+const migrator_1 = require("drizzle-orm/node-postgres/migrator");
 const schema = __importStar(require("./schema"));
-const databaseUrl = process.env.NODE_ENV === "test" && process.env.TEST_DATABASE_URL
-    ? process.env.TEST_DATABASE_URL
-    : env_1.env.DATABASE_URL;
-console.log("[@repo/database] Connecting to database URL:", databaseUrl);
-exports.db = (0, node_postgres_1.drizzle)(databaseUrl, { schema });
-__exportStar(require("drizzle-orm"), exports);
-exports.default = exports.db;
+require("dotenv/config");
+const databaseUrl = process.env.TEST_DATABASE_URL;
+if (!databaseUrl) {
+    throw new Error("TEST_DATABASE_URL is not set");
+}
+async function main() {
+    console.log("Migrating test database programmatically...");
+    const pool = new pg_1.Pool({ connectionString: databaseUrl });
+    const db = (0, node_postgres_1.drizzle)(pool, { schema });
+    await (0, migrator_1.migrate)(db, { migrationsFolder: "./drizzle" });
+    console.log("Test database migrated successfully!");
+    await pool.end();
+}
+main().catch(err => {
+    console.error("Migration failed:", err);
+    process.exit(1);
+});

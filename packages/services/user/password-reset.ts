@@ -68,8 +68,7 @@ export async function forgotPassword(email: string): Promise<void> {
     .where(eq(usersTable.id, user.id));
 
   // Build the reset URL with the RAW token (user will send it back to us)
-  const frontendUrl = env.FRONTEND_URL ?? "http://localhost:3000";
-  const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+  const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
   // Send the email — non-blocking failure (email service handles logging)
   await emailService.sendPasswordReset(user.email, resetUrl);

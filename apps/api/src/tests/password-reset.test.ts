@@ -30,6 +30,12 @@ async function createTestUser() {
     email: TEST_EMAIL,
     password: "OldPassword1!",
   });
+  
+  await testDb
+    .update(usersTable)
+    .set({ emailVerified: true })
+    .where(eq(usersTable.email, TEST_EMAIL));
+
   const [user] = await testDb
     .select()
     .from(usersTable)
