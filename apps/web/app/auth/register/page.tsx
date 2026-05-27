@@ -7,6 +7,7 @@ import { trpc } from "~/trpc/client";
 import { setSessionToken } from "~/lib/auth";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { env } from "~/env.js";
 import {
   Card,
   CardHeader,
@@ -143,6 +144,32 @@ export default function RegisterPage() {
               )}
             </Button>
           </form>
+
+          <div className="relative my-6 flex items-center">
+            <div className="flex-grow border-t border-[#D4C9B0]/50"></div>
+            <span className="flex-shrink mx-4 text-[10px] text-[#A89880] uppercase tracking-wider font-semibold">Or</span>
+            <div className="flex-grow border-t border-[#D4C9B0]/50"></div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-[#D4C9B0] hover:bg-[#EDE8DC] bg-[#FAF7F2] text-[#1A1008] flex items-center justify-center gap-2.5 font-medium rounded-lg py-2.5 shadow-sm transition-colors duration-200 cursor-pointer"
+            onClick={() => {
+              const apiBaseUrl = (env.NEXT_PUBLIC_API_URL || "http://localhost:8000/trpc").replace(/\/trpc$/, "");
+              window.location.href = `${apiBaseUrl}/auth/google`;
+            }}
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+              <g transform="matrix(1, 0, 0, 1, 0, 0)">
+                <path d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.58h3.3c1.93,-1.78 3.04,-4.4 3.04,-7.47c0,-0.64 -0.06,-1.25 -0.17,-1.8l0,0Z" fill="#4285F4" />
+                <path d="M12,20.62c2.43,0 4.47,-0.8 5.96,-2.2l-3.3,-2.58c-0.9,0.6 -2.08,0.98 -3.3,0.98c-2.34,0 -4.33,-1.58 -5.04,-3.7H2.9v2.66c1.48,2.94 4.54,4.94 8.1,4.94Z" fill="#34A853" />
+                <path d="M6.96,13.12a5.2,5.2 0 0,1 0,-3.24V7.22H2.9a8.97,8.97 0 0,0 0,7.96l4.06,-3.06Z" fill="#FBBC05" />
+                <path d="M12,7.38c1.32,0 2.5,0.46 3.44,1.35l2.58,-2.58C16.46,4.72 14.43,3.92 12,3.92c-3.56,0 -6.62,2 -8.1,4.94l4.06,3.06c0.7,-2.12 2.7,-3.7 5.04,-3.7Z" fill="#EA4335" />
+              </g>
+            </svg>
+            Continue with Google
+          </Button>
         </CardContent>
         <CardFooter className="flex justify-center text-center mt-6 p-0 border-t border-[#D4C9B0]/50 pt-4">
           <div className="text-xs text-[#6B5744]">

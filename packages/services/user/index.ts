@@ -124,6 +124,100 @@ class UserService {
     };
   }
 
+  public async loginWithGoogle(
+    googleId: string,
+    email: string,
+    fullName: string,
+    profileImageUrl?: string
+  ) {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1. Find user by googleId
+    let user = await db.query.usersTable.findFirst({
+      where: eq(usersTable.googleId, googleId),
+    });
+
+    if (user) {
+      const token = signJwt({ userId: user.id });
+      return {
+        token,
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          profileImageUrl: user.profileImageUrl,
+        },
+      };
+    }
+
+    // 2. Find user by email
+    user = await db.query.usersTable.findFirst({
+      where: eq(usersTable.email, normalizedEmail),
+    });
+
+    if (user) {
+      // User exists with email, but does not have googleId linked. Link it!
+      const [updatedUser] = await db
+        .update(usersTable)
+        .set({
+          googleId,
+          provider: "google",
+          profileImageUrl: user.profileImageUrl || profileImageUrl,
+        })
+        .where(eq(usersTable.id, user.id))
+        .returning();
+
+      if (!updatedUser) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update user OAuth info.",
+        });
+      }
+
+      const token = signJwt({ userId: updatedUser.id });
+      return {
+        token,
+        user: {
+          id: updatedUser.id,
+          fullName: updatedUser.fullName,
+          email: updatedUser.email,
+          profileImageUrl: updatedUser.profileImageUrl,
+        },
+      };
+    }
+
+    // 3. User does not exist, create new user
+    const [newUser] = await db
+      .insert(usersTable)
+      .values({
+        fullName,
+        email: normalizedEmail,
+        emailVerified: true,
+        googleId,
+        provider: "google",
+        profileImageUrl,
+      })
+      .returning();
+
+    if (!newUser) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create user from Google account.",
+      });
+    }
+
+    const token = signJwt({ userId: newUser.id });
+    return {
+      token,
+      user: {
+        id: newUser.id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        profileImageUrl: newUser.profileImageUrl,
+      },
+    };
+  }
+
   public async isAdminUser(userId: string): Promise<boolean> {
     const user = await db.query.usersTable.findFirst({
       where: eq(usersTable.id, userId),

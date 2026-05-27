@@ -10,6 +10,8 @@ import { serverRouter, createContext } from "@repo/trpc/server";
 import { db, eq, and } from "@repo/database";
 import { formsTable, responsesTable } from "@repo/database/schema";
 import { verifyJwt } from "@repo/services/user/auth";
+import { googleOAuth2Client } from "@repo/services/clients/google-oauth";
+import { userService } from "@repo/services/user/index";
 
 // Import and validate env at startup
 import { env } from "./env";
@@ -45,6 +47,88 @@ export async function createApp() {
 
   app.get("/health", (req, res) => {
     return res.json({ message: "Streamyst server is healthy", healthy: true });
+  });
+
+  app.get("/auth/google", (req, res) => {
+    const url = googleOAuth2Client.generateAuthUrl({
+      access_type: "offline",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+      prompt: "select_account",
+    });
+    return res.redirect(url);
+  });
+
+  app.get("/auth/google/callback", async (req, res) => {
+    const { code } = req.query;
+    if (!code || typeof code !== "string") {
+      return res.status(400).json({ error: "Missing authorization code" });
+    }
+
+    try {
+      // Exchange code for tokens
+      const { tokens } = await googleOAuth2Client.getToken(code);
+      googleOAuth2Client.setCredentials(tokens);
+
+      let googleId = "";
+      let email = "";
+      let name = "";
+      let picture = "";
+
+      if (tokens.id_token) {
+        const ticket = await googleOAuth2Client.verifyIdToken({
+          idToken: tokens.id_token,
+          audience: env.GOOGLE_OAUTH_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        if (payload) {
+          googleId = payload.sub;
+          email = payload.email || "";
+          name = payload.name || "";
+          picture = payload.picture || "";
+        }
+      }
+
+      if (!googleId || !email) {
+        // Fallback: fetch user info using access token
+        const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`,
+          },
+        });
+        if (response.ok) {
+          const profile = (await response.json()) as any;
+          googleId = profile.id;
+          email = profile.email;
+          name = profile.name || "";
+          picture = profile.picture || "";
+        }
+      }
+
+      if (!googleId || !email) {
+        return res.status(400).json({ error: "Failed to retrieve user profile from Google" });
+      }
+
+      // Call UserService.loginWithGoogle
+      const result = await userService.loginWithGoogle(googleId, email, name, picture);
+
+      // Set cookie
+      res.cookie("session_token", result.token, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
+      // Redirect to frontend dashboard
+      return res.redirect(`${env.FRONTEND_URL}/dashboard`);
+    } catch (err) {
+      logger.error("Google OAuth callback error", { err });
+      return res.redirect(`${env.FRONTEND_URL}/auth/login?error=oauth_failed`);
+    }
   });
 
   logger.debug(`openapi.json: ${env.BASE_URL}/openapi.json`);

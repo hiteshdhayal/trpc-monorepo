@@ -22,6 +22,13 @@
       "when": 1779457290287,
       "tag": "0002_skinny_ozymandias",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779861375121,
+      "tag": "0003_fair_freak",
+      "breakpoints": true
     }
   ]
 }

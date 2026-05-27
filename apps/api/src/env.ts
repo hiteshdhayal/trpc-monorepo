@@ -9,6 +9,9 @@ const envSchema = z.object({
     .url("FRONTEND_URL must be a valid URL"),
   DATABASE_URL: z.string({ error: "DATABASE_URL is required to connect to the database" }),
   JWT_SECRET: z.string({ error: "JWT_SECRET is required for authentication" }),
+  GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_OAUTH_REDIRECT_URI: z.string().optional(),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {
