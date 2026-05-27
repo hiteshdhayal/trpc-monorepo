@@ -1,153 +1,368 @@
 # FinalForms
 
-A production-grade, Typeform-inspired conversational form builder SaaS built with tRPC, Drizzle ORM, Next.js, and Express in a Turborepo monorepo.
-
-![CI](https://github.com/hitesh/finalforms/actions/workflows/ci.yml/badge.svg)
+A modern AI-powered conversational form builder built with a full-stack TypeScript monorepo architecture using tRPC, Next.js, Express, PostgreSQL, and Drizzle ORM.
 
 ---
 
-## 👨‍⚖️ Quick Start for Judges
+# ✨ Features
 
-### 🔑 Demo Credentials
+## 🔐 Authentication
 
-| Field    | Value                  |
-| -------- | ---------------------- |
-| Email    | `admin@finalforms.com` |
-| Password | `password123`          |
+* Email/password authentication
+* Google OAuth login
+* JWT-based auth
+* Password reset flow
+* Email verification
+* Protected routes
+* Role-based admin access
 
-### 🚀 Start the App
+---
+
+## 📝 Form Builder
+
+* Create conversational forms
+* Dynamic question flows
+* Form editing dashboard
+* Public form sharing
+* Real-time response collection
+* AI-friendly conversational UI
+
+---
+
+## 📊 Dashboard
+
+* User dashboard
+* Form analytics
+* Response management
+* Admin panel
+* Form editing interface
+
+---
+
+## ⚡ Tech Features
+
+* Monorepo architecture
+* End-to-end type safety with tRPC
+* PostgreSQL database
+* Drizzle ORM + migrations
+* Shared packages
+* TurboRepo build system
+* Modern React UI
+* Server-side rendering
+* API documentation
+* Docker support
+
+---
+
+# 🏗️ Monorepo Structure
 
 ```bash
-# 1. Install dependencies
-pnpm install
-
-# 2. Start Docker (Postgres) then seed
-docker compose up -d
-pnpm --filter @repo/database seed
-
-# 3. Run everything
-pnpm dev
-```
-
-### 🔗 URLs
-
-- **Frontend**: http://localhost:3000
-- **API Docs (Scalar)**: http://localhost:8000/docs
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
-
-### 🗺️ Seeded Data Map
-
-| Seeded Form                | URL                    | Feature to Evaluate                            |
-| -------------------------- | ---------------------- | ---------------------------------------------- |
-| Hogwarts Sorting Ceremony  | `/forms/sorting-hat`   | Drop-off funnel analytics, honeypot protection |
-| Night City Glitch Registry | `/forms/cyber-glitch`  | Cyberpunk theme, response limit enforcement    |
-| Y-Combinator Application   | Dashboard → forms list | Startup theme, unlisted visibility             |
-
----
-
-## 🛠️ Tech Stack & Architecture
-
-- **Monorepo Manager**: Turborepo + pnpm workspaces
-- **Frontend (`apps/web`)**: Next.js 16 (React 19), Tailwind CSS v4, shadcn/radix primitives
-- **API Server (`apps/api`)**: Express + tRPC + Scalar OpenAPI docs at `/docs`
-- **Database (`packages/database`)**: PostgreSQL (Docker) via Drizzle ORM
-- **Shared Packages**:
-  - `@repo/trpc` — tRPC router types shared by web and api
-  - `@repo/database` — Drizzle schema models, relations, migrations, seed
-  - `@repo/services` — Business logic, JWT auth, email
-  - `@repo/logger` — Winston console logger
-
----
-
-## ✨ Key Features
-
-### Form Builder
-
-- 6 field types: short text, long text, email, number, single select, multi select
-- Conditional logic (show/hide fields based on answers)
-- Three visual themes: Startup, Hogwarts, Cyberpunk
-- Live preview during editing
-- Custom URL slugs, expiry dates, response limits
-
-### Form Filler (Public)
-
-- Conversational stepper UI with Framer Motion transitions
-- Enter key navigation, keyboard-first UX
-- Honeypot bot protection + IP rate limiting
-- No login required to submit forms
-- Partial progress saved to database per-question
-
-### Analytics Dashboard
-
-- Completion rate metrics
-- Per-field drop-off funnel chart
-- Choice distribution pie charts (computed server-side)
-- Response timeline bucketed by day (`date_trunc`)
-- Streaming CSV export with proper escaping
-
-### Security
-
-- Helmet + strict CORS (exact frontend URL, not `*`)
-- Zod environment validation at startup
-- JWT authentication with `crypto.scryptSync` password hashing
-- Form ownership verification on every creator mutation
-- Independent rate limiting: 10 submissions per IP per 10 minutes
-
----
-
-## 📊 Database Schema
-
-5 core tables with Drizzle relations:
-
-1. **`users`** — creators (name, email, password hash)
-2. **`forms`** — config (title, status, visibility, theme, slug, limits, expiry)
-3. **`form_fields`** — inputs (type, label, required, options, validation rules)
-4. **`responses`** — submissions (completion status, respondent email, timestamps)
-5. **`response_answers`** — individual answers keyed by fieldId (JSON snapshots)
-
----
-
-## 🧪 Testing
-
-```bash
-# Run integration tests
-pnpm turbo test
-
-# Run linter + type checker
-pnpm turbo lint typecheck
-```
-
-Tests cover:
-
-- Auth flows (register, duplicate email, login, wrong password, protected routes)
-- Form submission (valid submit, unpublished rejection, missing required fields, fake fieldId, invalid select option)
-
----
-
-## 🔄 CI Pipeline
-
-GitHub Actions runs on every push to `main`/`dev` and PRs to `main`:
-
-- `pnpm turbo lint`
-- `pnpm turbo typecheck`
-- `pnpm turbo test`
-
----
-
-## 📁 Project Structure
-
-```
 trpc-monorepo/
+│
 ├── apps/
-│   ├── api/          # Express + tRPC server
+│   ├── api/          # Express + tRPC backend
 │   └── web/          # Next.js frontend
+│
 ├── packages/
-│   ├── database/     # Drizzle schema, migrations, seed
-│   ├── services/     # Business logic (form, user, email)
-│   ├── trpc/         # Shared tRPC router definitions
-│   ├── logger/       # Winston logger
-│   ├── eslint-config/
-│   └── typescript-config/
+│   ├── database/     # Drizzle ORM + schema
+│   ├── services/     # Business logic
+│   ├── trpc/         # Shared tRPC routers
+│   ├── logger/       # Logging utilities
+│   ├── shared/       # Shared schemas/types
+│   └── eslint-config/
+│
 ├── turbo.json
-└── docker-compose.yml
+├── pnpm-workspace.yaml
+└── package.json
 ```
+
+---
+
+# 🚀 Tech Stack
+
+## Frontend
+
+* Next.js 16
+* React 19
+* TypeScript
+* Tailwind CSS
+* tRPC Client
+
+## Backend
+
+* Node.js
+* Express.js
+* tRPC
+* JWT Authentication
+* Zod validation
+
+## Database
+
+* PostgreSQL
+* Drizzle ORM
+* Drizzle Kit
+
+## Dev Tools
+
+* TurboRepo
+* PNPM Workspaces
+* ESLint
+* Prettier
+* Husky
+* Vitest
+
+---
+
+# ⚙️ Environment Variables
+
+## Root `.env`
+
+```env
+DATABASE_URL=your_postgres_url
+JWT_SECRET=your_jwt_secret
+
+BASE_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:3000
+
+NEXT_PUBLIC_API_URL=http://localhost:8000/trpc
+```
+
+---
+
+# 🛠️ Installation
+
+## 1. Clone repository
+
+```bash
+git clone https://github.com/your-username/trpc-monorepo.git
+cd trpc-monorepo
+```
+
+---
+
+## 2. Install dependencies
+
+```bash
+pnpm install
+```
+
+---
+
+## 3. Setup environment variables
+
+Create `.env` in the root directory.
+
+---
+
+## 4. Run database migrations
+
+```bash
+pnpm db:migrate
+```
+
+---
+
+## 5. Start development server
+
+```bash
+pnpm run dev
+```
+
+---
+
+# 📦 Available Scripts
+
+## Development
+
+```bash
+pnpm run dev
+```
+
+Runs:
+
+* Next.js frontend
+* Express API
+* Drizzle Studio
+
+---
+
+## Build
+
+```bash
+pnpm run build
+```
+
+---
+
+## Database Migration
+
+```bash
+pnpm db:migrate
+```
+
+---
+
+## Generate Migration
+
+```bash
+pnpm db:generate
+```
+
+---
+
+## Lint
+
+```bash
+pnpm lint
+```
+
+---
+
+## Format
+
+```bash
+pnpm format
+```
+
+---
+
+# 🌐 Deployment
+
+## Frontend (Vercel)
+
+Deploy `apps/web` to Vercel.
+
+Required environment variables:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-url.up.railway.app/trpc
+```
+
+---
+
+## Backend (Railway)
+
+Deploy the monorepo root to Railway.
+
+### Build Command
+
+```bash
+pnpm install && pnpm build
+```
+
+### Start Command
+
+```bash
+cd apps/api && pnpm start
+```
+
+### Required Environment Variables
+
+```env
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+JWT_SECRET=your_secret
+FRONTEND_URL=https://your-frontend.vercel.app
+BASE_URL=https://your-backend.up.railway.app
+```
+
+---
+
+# 🗄️ Database
+
+This project uses:
+
+* PostgreSQL
+* Drizzle ORM
+* SQL migrations
+
+Run Drizzle Studio:
+
+```bash
+pnpm --filter @repo/database dev
+```
+
+---
+
+# 🔒 Security Features
+
+* JWT Authentication
+* CORS protection
+* Password hashing
+* CSRF protection
+* Input validation
+* Request rate limiting
+* Secure cookies
+* Environment validation
+
+---
+
+# 📡 API
+
+The backend exposes:
+
+* tRPC endpoints
+* REST-compatible handlers
+* OpenAPI docs
+
+### Local API Docs
+
+```txt
+http://localhost:8000/docs
+```
+
+---
+
+# 🧪 Testing
+
+Run tests:
+
+```bash
+pnpm test
+```
+
+---
+
+# 🐳 Docker Support
+
+Docker Compose included:
+
+```bash
+docker-compose up
+```
+
+---
+
+# 📈 Future Improvements
+
+* AI-generated forms
+* Response analytics dashboard
+* Team collaboration
+* Webhooks
+* Form templates
+* Email campaigns
+* Dark mode
+* Mobile optimization
+
+---
+
+# 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push branch
+5. Open Pull Request
+
+---
+
+# 📄 License
+
+MIT License
+
+---
+
+# 👨‍💻 Author
+
+Built by Hitesh Dhayal
+
+GitHub: [https://github.com/hiteshdhayal](https://github.com/hiteshdhayal)
