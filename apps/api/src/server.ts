@@ -172,17 +172,14 @@ export async function createApp() {
       // Call UserService.loginWithGoogle
       const result = await userService.loginWithGoogle(googleId, email, name, picture);
 
-      // Set cookie
-      res.cookie("session_token", result.token, {
-        httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      });
-
-      // Redirect to frontend dashboard
-      return res.redirect(`${env.FRONTEND_URL}/dashboard`);
+      // Pass the JWT to the frontend via a URL query param.
+      // We cannot rely on an httpOnly cookie here because the backend (Railway)
+      // and frontend (Vercel) are on different top-level domains, and browsers
+      // block cross-site cookies (SameSite=Lax). The frontend /auth/callback page
+      // will read the token, store it in its own domain cookie, then redirect.
+      const redirectUrl = new URL(`${env.FRONTEND_URL}/auth/callback`);
+      redirectUrl.searchParams.set("token", result.token);
+      return res.redirect(redirectUrl.toString());
     } catch (err) {
       logger.error("Google OAuth callback error", { err });
       return res.redirect(`${env.FRONTEND_URL}/auth/login?error=oauth_failed`);
