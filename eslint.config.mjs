@@ -1,29 +1,10 @@
-// Root-level ESLint flat config for ESLint v9.
-//
-// WHY THIS FILE EXISTS
-// --------------------
-// lint-staged runs `eslint --fix` from the monorepo root (see package.json
-// "lint-staged" config). ESLint 9 requires a flat config file to be reachable
-// by traversing up from the linted file. Without this root config, ESLint 9
-// exits immediately with:
-//   "ESLint couldn't find an eslint.config.(js|mjs|cjs) file."
-//
-// Each workspace package already has its own eslint.config.mjs which ESLint
-// discovers and merges via the normal config-search algorithm. This root config
-// acts as the "catch-all" baseline so ESLint doesn't error when it reaches the
-// root before finding a package-level config.
-//
-// IMPORTANT: This file must stay as .js (CJS) because the root package.json
-// does NOT set "type":"module". Workspace packages that do set "type":"module"
-// use .mjs files.
-
 import { config as baseConfig } from "@repo/eslint-config/base";
+import { nextJsConfig } from "@repo/eslint-config/next-js";
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
-  ...baseConfig,
+  // 1. Global ignores at the root
   {
-    // Ignore generated/compiled output and dependency directories at the root.
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
@@ -31,6 +12,21 @@ export default [
       "**/build/**",
       "**/.turbo/**",
       "pnpm-lock.yaml",
+      "**/seed-raw.js",
+      "**/seed.js",
     ],
   },
+  // 2. Base TypeScript and general rules for all files in the monorepo
+  ...baseConfig,
+  // 3. Next.js and React configuration specifically for the frontend application (apps/web)
+  ...nextJsConfig.map((configBlock) => {
+    // Global ignore blocks in subconfigs must remain as-is without any 'files' property
+    if (configBlock.ignores && Object.keys(configBlock).length === 1) {
+      return configBlock;
+    }
+    return {
+      ...configBlock,
+      files: ["apps/web/**/*.{js,jsx,ts,tsx}"],
+    };
+  }),
 ];
