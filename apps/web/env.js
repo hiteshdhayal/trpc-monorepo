@@ -4,8 +4,17 @@ import { z } from "zod";
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here.
+   * These are only available on the server and are never sent to the browser.
    */
-  server: {},
+  server: {
+    GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
+    GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
+    /**
+     * Must match an Authorized Redirect URI registered in Google Cloud Console.
+     * For production: https://trpc-monorepo-web.vercel.app/api/auth/callback/google
+     */
+    GOOGLE_OAUTH_REDIRECT_URI: z.string().optional(),
+  },
 
   /**
    * Client-side environment variables (must be prefixed with NEXT_PUBLIC_).
@@ -23,6 +32,9 @@ export const env = createEnv({
   },
 
   runtimeEnv: {
+    GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
+    GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    GOOGLE_OAUTH_REDIRECT_URI: process.env.GOOGLE_OAUTH_REDIRECT_URI,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
@@ -31,3 +43,4 @@ export const env = createEnv({
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
 });
+

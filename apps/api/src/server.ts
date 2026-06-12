@@ -34,19 +34,22 @@ export async function createApp() {
   // ── Security: Helmet with strict headers ─────────────────────────────────────
   app.use(
     helmet({
-      contentSecurityPolicy: env.NODE_ENV === "production" ? {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"], // needed for Scalar docs UI
-          imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", env.FRONTEND_URL, "https://accounts.google.com"],
-          fontSrc: ["'self'"],
-          objectSrc: ["'none'"],
-          frameSrc: ["'none'"],
-          upgradeInsecureRequests: [],
-        },
-      } : false,
+      contentSecurityPolicy:
+        env.NODE_ENV === "production"
+          ? {
+              directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'"],
+                styleSrc: ["'self'", "'unsafe-inline'"], // needed for Scalar docs UI
+                imgSrc: ["'self'", "data:", "https:"],
+                connectSrc: ["'self'", env.FRONTEND_URL, "https://accounts.google.com"],
+                fontSrc: ["'self'"],
+                objectSrc: ["'none'"],
+                frameSrc: ["'none'"],
+                upgradeInsecureRequests: [],
+              },
+            }
+          : false,
       frameguard: { action: "deny" },
       hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
       noSniff: true,
@@ -83,8 +86,45 @@ export async function createApp() {
     res.json({ csrfToken: generateToken(req, res) });
   });
 
+  /**
+   * POST /auth/google/session — registered BEFORE doubleCsrfProtection.
+   *
+   * This endpoint is called server-to-server from the Next.js API route
+   * (/api/auth/callback/google on Vercel). There is no browser involved at
+   * this point, so no CSRF cookie/header is available. Exempting it here is
+   * safe because the caller is a trusted server process, not a browser.
+   *
+   * Request body: { googleId, email, fullName, profileImageUrl? }
+   * Response:     { token: string }
+   */
+  app.post("/auth/google/session", async (req, res) => {
+    const { googleId, email, fullName, profileImageUrl } = req.body as {
+      googleId?: string;
+      email?: string;
+      fullName?: string;
+      profileImageUrl?: string;
+    };
+
+    if (!googleId || !email) {
+      return res.status(400).json({ error: "googleId and email are required" });
+    }
+
+    try {
+      const result = await userService.loginWithGoogle(
+        googleId,
+        email,
+        fullName ?? "",
+        profileImageUrl,
+      );
+      return res.json({ token: result.token });
+    } catch (err) {
+      logger.error("POST /auth/google/session error", { err });
+      return res.status(500).json({ error: "Failed to create session" });
+    }
+  });
+
   app.use(doubleCsrfProtection);
-  
+
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (err == invalidCsrfTokenError) {
       res.status(403).json({ error: "Invalid CSRF token" });
@@ -157,7 +197,12 @@ export async function createApp() {
           },
         });
         if (response.ok) {
-          const profile = (await response.json()) as { id: string; email: string; name?: string; picture?: string };
+          const profile = (await response.json()) as {
+            id: string;
+            email: string;
+            name?: string;
+            picture?: string;
+          };
           googleId = profile.id;
           email = profile.email;
           name = profile.name || "";
@@ -197,9 +242,10 @@ export async function createApp() {
     const { apiReference } = await import("@scalar/express-api-reference");
     app.use("/docs", apiReference({ url: "/openapi.json" }));
   } catch (err) {
-    logger.warn("Failed to load @scalar/express-api-reference – /docs will be unavailable", { err });
+    logger.warn("Failed to load @scalar/express-api-reference – /docs will be unavailable", {
+      err,
+    });
   }
-
 
   /**
    * ─────────────────────────────────────────────────────────────────────────────
@@ -321,7 +367,7 @@ export async function createApp() {
       res.write(headers.map(escapeCSV).join(",") + "\r\n");
 
       // Chunk pagination: fetch responses in batches and stream
-      let limit = 100;
+      const limit = 100;
       let offset = 0;
       let hasMore = true;
 
@@ -385,7 +431,12 @@ export async function createApp() {
   );
   // General auth rate limit: login + register — prevents credential stuffing
   app.post(
-    ["/trpc/auth.login", "/api/authentication/login", "/trpc/auth.register", "/api/authentication/register"],
+    [
+      "/trpc/auth.login",
+      "/api/authentication/login",
+      "/trpc/auth.register",
+      "/api/authentication/register",
+    ],
     authRateLimiter,
   );
 
